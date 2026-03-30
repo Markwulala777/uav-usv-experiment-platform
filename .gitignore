@@ -1,0 +1,28 @@
+# OS / editor
+.DS_Store
+Thumbs.db
+*.swp
+*.swo
+.idea/
+.vscode/
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# ROS / catkin build outputs
+build/
+devel/
+install/
+logs/
+.catkin_tools/
+
+# Temporary runtime workspaces if created inside this repository
+runtime/
+workspace/
+
+# Patch / merge leftovers
+*.orig
+*.rej
