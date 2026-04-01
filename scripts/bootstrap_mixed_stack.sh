@@ -33,6 +33,7 @@ install_runtime_scripts() {
     "$REPO_ROOT/scripts/run_microxrce_agent.sh" \
     "$REPO_ROOT/scripts/run_ros1_bridge.sh" \
     "$REPO_ROOT/scripts/run_ros2_research.sh" \
+    "$REPO_ROOT/scripts/stop_platform.sh" \
     "$INSTALL_ROOT/scripts/"
   chmod +x "$INSTALL_ROOT/scripts/"*.sh
 }
