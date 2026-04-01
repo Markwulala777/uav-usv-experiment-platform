@@ -92,9 +92,11 @@ New source and bootstrap entry points:
 
 See `docs/MIXED_ROS1_ROS2_ARCHITECTURE.md` for the new layer split and bring-up order.
 
-## Frozen coordinate convention
+## Frozen coordinate and time convention
 
-Phase 1 freezes the coordinate responsibilities so the same state is not converted twice.
+Phase 1 freezes both coordinate ownership and simulation-time ownership so the research stack stays reproducible across ROS 1, ROS 2, Gazebo, and PX4.
+
+Coordinate boundary:
 
 - Gazebo truth and research-layer truth stay in `world` ENU.
 - `deck_interface_ros1` extracts truth from `/gazebo/model_states` and publishes deck, landing-target, UAV, and relative states without converting them into PX4 coordinates.
@@ -104,13 +106,28 @@ Phase 1 freezes the coordinate responsibilities so the same state is not convert
 - The bridge then performs exactly one conversion chain: `world ENU -> local ENU -> local NED`.
 - No other node in this repository should publish PX4 setpoints in NED or re-apply ENU-to-NED conversion.
 
-Operational consequences:
+Operational consequences for coordinates:
 
 - If PX4 local position resets, the bridge re-resolves the local origin instead of changing the research-layer frame convention.
 - During local-origin re-resolution, the bridge keeps publishing the OFFBOARD heartbeat and holds the last valid local NED setpoint instead of going silent.
 - This keeps the research-layer contract stable while reducing OFFBOARD dropouts caused by transient PX4 local-position resets.
 
-See `docs/FRAME_CONVENTION.md` for the detailed frame definitions and audit rules.
+Time base boundary:
+
+- Gazebo is the simulation clock source for the ROS side of the platform.
+- The ROS 1 world launch enables `use_sim_time=true`, so ROS 1 nodes follow Gazebo `/clock`.
+- The ROS 2 Stage 1 launch also sets `use_sim_time=true`, so ROS 2 research nodes follow the same Gazebo `/clock`.
+- This means ROS 1 world nodes and ROS 2 research nodes share one simulation-time basis during runtime and replay.
+- PX4 does not directly subscribe to ROS `use_sim_time`; instead, PX4 stays aligned to the simulator through the SITL transport and PX4-side simulator timing.
+- MAVROS wall/system time synchronization is disabled in the PX4 world launch overlay so it does not fight Gazebo simulation time.
+
+Operational consequences for time:
+
+- ROS1 and ROS2 logs should be interpreted on Gazebo simulation time.
+- PX4 status should be treated as simulator-synchronized, but not as a ROS `/clock` consumer.
+- If Gazebo is paused, reset, or jumps in time, ROS nodes will reflect that jump because they are intentionally using simulation time.
+
+See `docs/FRAME_CONVENTION.md` for the detailed frame definitions and audit rules, and `docs/MIXED_ROS1_ROS2_ARCHITECTURE.md` for the layer boundaries.
 
 For ROS 2 workspaces, prefer an ASCII-only path such as `~/uav-usv-experiment-platform-runtime` and avoid non-ASCII paths like `~/下载/...`, because `px4_msgs` interface generation was observed to fail under a non-ASCII workspace path on this machine.
 
