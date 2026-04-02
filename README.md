@@ -51,6 +51,7 @@ uav-usv-experiment-platform/
 ```
 
 See [CHANGELOG.md](CHANGELOG.md) for the repository-level change history.
+For Codex and similar coding agents, see [AGENT.md](AGENT.md).
 
 ## What gets deployed
 
