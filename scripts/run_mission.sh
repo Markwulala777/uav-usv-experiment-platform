@@ -15,6 +15,13 @@ CATKIN_WS="${CATKIN_WS:-$INSTALL_ROOT/catkin_ws}"
 XTDRONE_DIR="${XTDRONE_DIR:-$INSTALL_ROOT/XTDrone}"
 MISSION_SCRIPT="${MISSION_SCRIPT:-$XTDRONE_DIR/control/usv_drone_mission.py}"
 
+source_setup() {
+  local setup_file="$1"
+  set +u
+  source "$setup_file"
+  set -u
+}
+
 if [[ ! -f /opt/ros/noetic/setup.bash ]]; then
   echo "ROS Noetic was not found at /opt/ros/noetic/setup.bash" >&2
   exit 1
@@ -32,8 +39,8 @@ if [[ ! -f "$MISSION_SCRIPT" ]]; then
   exit 1
 fi
 
-source /opt/ros/noetic/setup.bash
-source "$CATKIN_WS/devel/setup.bash"
+source_setup /opt/ros/noetic/setup.bash
+source_setup "$CATKIN_WS/devel/setup.bash"
 
 cd "$(dirname "$MISSION_SCRIPT")"
 exec python3 "$(basename "$MISSION_SCRIPT")"

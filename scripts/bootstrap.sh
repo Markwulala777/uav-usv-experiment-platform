@@ -25,6 +25,13 @@ need_cmd() {
   fi
 }
 
+source_setup() {
+  local setup_file="$1"
+  set +u
+  source "$setup_file"
+  set -u
+}
+
 reset_ros_env() {
   unset AMENT_PREFIX_PATH COLCON_PREFIX_PATH CMAKE_PREFIX_PATH LD_LIBRARY_PATH PKG_CONFIG_PATH PYTHONPATH
   unset ROS_DISTRO ROS_ETC_DIR ROS_MASTER_URI ROS_PACKAGE_PATH ROS_ROOT ROS_VERSION ROS_PYTHON_VERSION
@@ -104,7 +111,7 @@ echo "[bootstrap] Applying experiment overlays"
 echo "[bootstrap] Installing runtime launcher scripts"
 install_runtime_scripts
 
-source /opt/ros/noetic/setup.bash
+source_setup /opt/ros/noetic/setup.bash
 
 if [[ "$SKIP_PX4_PIP" == "1" ]]; then
   echo "[bootstrap] SKIP_PX4_PIP=1, skipping PX4 Python dependency installation"

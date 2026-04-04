@@ -16,6 +16,13 @@ PX4_DIR="${PX4_DIR:-$INSTALL_ROOT/PX4_Firmware}"
 WORLD_FILE="${WORLD_FILE:-$CATKIN_WS/build/vrx_gazebo/worlds/example_course.world}"
 LAUNCH_FILE="${LAUNCH_FILE:-$PX4_DIR/launch/sandisland.launch}"
 
+source_setup() {
+  local setup_file="$1"
+  set +u
+  source "$setup_file"
+  set -u
+}
+
 need_cmd() {
   if ! command -v "$1" >/dev/null 2>&1; then
     echo "Missing required command: $1" >&2
@@ -75,8 +82,8 @@ fi
 
 need_cmd xmlstarlet
 
-source /opt/ros/noetic/setup.bash
-source "$CATKIN_WS/devel/setup.bash"
+source_setup /opt/ros/noetic/setup.bash
+source_setup "$CATKIN_WS/devel/setup.bash"
 
 unset PX4_SIM_MODEL PX4_SIMULATOR PX4_SYS_AUTOSTART PX4_SIM_HOSTNAME PX4_SIM_HOST_ADDR
 unset PX4_GZ_MODEL PX4_GZ_MODEL_NAME PX4_GZ_MODEL_POSE PX4_GZ_WORLD PX4_GZ_WORLDS
@@ -100,7 +107,9 @@ export GAZEBO_RESOURCE_PATH=""
 if [[ -f "$PX4_DIR/Tools/simulation/gazebo-classic/setup_gazebo.bash" ]]; then
   source "$PX4_DIR/Tools/simulation/gazebo-classic/setup_gazebo.bash" "$PX4_DIR" "$PX4_DIR/build/px4_sitl_default"
 elif [[ -f "$PX4_DIR/Tools/setup_gazebo.bash" ]]; then
+  set +u
   source "$PX4_DIR/Tools/setup_gazebo.bash" "$PX4_DIR" "$PX4_DIR/build/px4_sitl_default"
+  set -u
 else
   echo "Missing PX4 Gazebo setup script under $PX4_DIR/Tools" >&2
   exit 1

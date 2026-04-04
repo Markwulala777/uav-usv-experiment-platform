@@ -14,6 +14,10 @@
 
 - 新增 `AGENT.md`，为 Codex 等代码代理补充仓库级操作指南，覆盖优先阅读文档、默认改动区域、mixed-stack 启动顺序、frame/time 硬约束以及验证与排障入口。
 
+### 修复
+
+- 修复在 `set -u` 严格 shell 环境下 source ROS Noetic setup 脚本时触发的 `ROS_DISTRO: unbound variable` 问题，统一为 `run_sim.sh`、`run_mission.sh` 和 `bootstrap.sh` 增加安全的 `source_setup()` 包装，避免运行与部署入口在新终端环境中启动失败。
+
 ## [0.2.1] - 2026-04-01
 
 ### 新增
