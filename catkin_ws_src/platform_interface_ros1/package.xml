@@ -1,0 +1,19 @@
+<?xml version="1.0"?>
+<package format="2">
+  <name>platform_interface_ros1</name>
+  <version>0.0.1</version>
+  <description>ROS 1 truth-level platform and relative-state interface for the mixed ROS1/ROS2 UAV-USV stack.</description>
+
+  <maintainer email="jia@example.com">jia</maintainer>
+  <license>MIT</license>
+
+  <buildtool_depend>catkin</buildtool_depend>
+
+  <depend>gazebo_msgs</depend>
+  <depend>geometry_msgs</depend>
+  <depend>rospy</depend>
+  <depend>std_msgs</depend>
+  <depend>tf</depend>
+
+  <export/>
+</package>

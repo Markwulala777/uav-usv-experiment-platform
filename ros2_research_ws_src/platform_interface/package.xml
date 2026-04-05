@@ -1,0 +1,19 @@
+<?xml version="1.0"?>
+<package format="3">
+  <name>platform_interface</name>
+  <version>0.0.1</version>
+  <description>ROS 2 relay for truth-level platform, landing-zone, and transitional UAV state topics coming from the ROS 1 bridge.</description>
+
+  <maintainer email="jia@example.com">jia</maintainer>
+  <license>MIT</license>
+
+  <buildtool_depend>ament_python</buildtool_depend>
+
+  <depend>geometry_msgs</depend>
+  <depend>rclpy</depend>
+  <depend>mission_stack_msgs</depend>
+
+  <export>
+    <build_type>ament_python</build_type>
+  </export>
+</package>

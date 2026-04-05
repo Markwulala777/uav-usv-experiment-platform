@@ -38,7 +38,7 @@ uav-usv-experiment-platform/
 │   ├── bootstrap.sh
 │   ├── bootstrap_mixed_stack.sh
 │   ├── run_ros1_world.sh
-│   ├── run_ros1_deck_interface.sh
+│   ├── run_ros1_platform_interface.sh
 │   ├── run_microxrce_agent.sh
 │   ├── run_ros1_bridge.sh
 │   ├── run_ros2_research.sh
@@ -88,7 +88,7 @@ New source and bootstrap entry points:
 - `ros1_bridge_ws` (created under the runtime root by the bootstrap script)
 - `scripts/bootstrap_mixed_stack.sh`
 - `scripts/run_ros1_world.sh`
-- `scripts/run_ros1_deck_interface.sh`
+- `scripts/run_ros1_platform_interface.sh`
 - `scripts/run_microxrce_agent.sh`
 - `scripts/run_ros1_bridge.sh`
 - `scripts/run_ros2_research.sh`
@@ -102,7 +102,7 @@ The current research baseline freezes both coordinate ownership and simulation-t
 Coordinate boundary:
 
 - Gazebo truth and research-layer truth stay in `world` ENU.
-- `deck_interface_ros1` extracts truth from `/gazebo/model_states` and publishes deck, landing-target, UAV, and relative states without converting them into PX4 coordinates.
+- `platform_interface_ros1` extracts truth from `/gazebo/model_states` and publishes deck, landing-target, UAV, and relative states without converting them into PX4 coordinates.
 - `relative_estimation` exposes `/relative_state/active` as the single public state input for downstream mission, decision, and control nodes.
 - `controller_interface` exposes `/controller/reference_active` as the single active control-reference input.
 - `landing_guidance` publishes `/guidance/reference` in `world` ENU semantics only.
@@ -138,8 +138,8 @@ See `docs/FRAME_CONVENTION.md` for the detailed frame definitions and audit rule
 
 The current ROS 2 research source tree is organized around the mission loop under `ros2_research_ws_src/`:
 
-- `uav_usv_landing_msgs`
-- `deck_interface`
+- `mission_stack_msgs`
+- `platform_interface`
 - `relative_estimation`
 - `mission_manager`
 - `landing_decision`
@@ -155,7 +155,7 @@ The current ROS 2 research source tree is organized around the mission loop unde
 The main pipeline is:
 
 ```text
-/deck/* + /uav/* -> /relative_state/active -> /mission/phase -> /landing_decision/status
+/platform/* + /uav/* -> /relative_state/active -> /mission/phase -> /landing_decision/status
 -> /guidance/reference or /planner/reference_trajectory -> /controller/reference_active
 -> /controller/command -> controller_interface/px4_offboard_bridge
 ```
@@ -242,14 +242,105 @@ Bootstrap the mixed runtime on an ASCII-only path:
 Then start the five runtime terminals in order:
 
 ```bash
-~/uav-usv-experiment-platform-runtime/scripts/run_ros1_world.sh
-~/uav-usv-experiment-platform-runtime/scripts/run_ros1_deck_interface.sh
+~/uav-usv-experiment-platform-runtime/scripts/run_ros1_world.sh --scenario scenario_3_maritime_usv_qr
+~/uav-usv-experiment-platform-runtime/scripts/run_ros1_platform_interface.sh
 ~/uav-usv-experiment-platform-runtime/scripts/run_microxrce_agent.sh
 ~/uav-usv-experiment-platform-runtime/scripts/run_ros1_bridge.sh
 ~/uav-usv-experiment-platform-runtime/scripts/run_ros2_research.sh
 ```
 
 After bootstrap, the runtime directory carries its own `scripts/` folder. Day-to-day launching can stay entirely inside the runtime tree, and you no longer need to call the source-repository path just to start the platform.
+
+The five-terminal sequence above remains the normal component-level runtime
+bring-up flow. For scenario 1/2/3 chain validation, prefer the canonical
+single-entry validation command instead of launching each terminal by hand:
+
+```bash
+~/uav-usv-experiment-platform-runtime/scripts/run_chain_validation.sh --scenario scenario_1_static_ground_qr
+~/uav-usv-experiment-platform-runtime/scripts/run_chain_validation.sh --scenario scenario_2_ground_moving_qr
+~/uav-usv-experiment-platform-runtime/scripts/run_chain_validation.sh --scenario scenario_3_maritime_usv_qr
+```
+
+## Scenario launch mapping
+
+The ROS 2 research layer now exposes one shared mission-stack launch plus three
+scenario-specific wrappers:
+
+```bash
+ros2 launch joint_bringup mission_stack_minimal.launch.py
+ros2 launch joint_bringup mission_stack_full.launch.py
+ros2 launch joint_bringup scenario_1_static_ground_qr.launch.py
+ros2 launch joint_bringup scenario_2_ground_moving_qr.launch.py
+ros2 launch joint_bringup scenario_3_maritime_usv_qr.launch.py
+```
+
+Common overrides:
+
+- `planner_backend:=baseline|moving_target|chance_constrained|tube_based|learning_augmented`
+- `reference_source:=guidance|planner`
+- `enable_planner:=true|false`
+- `enable_decision:=true|false`
+
+Scenario notes:
+
+- Scenario 1 `static_ground_qr`
+  Canonical ROS 1 world entry is
+  `run_ros1_world.sh --scenario scenario_1_static_ground_qr`, which resolves
+  to `XTDrone/sitl_config/launch/zhihang1.launch`. The
+  canonical static target is `landing1`, and for chain validation the landing
+  zone center is defined as the `landing1` model origin in Gazebo world
+  coordinates. In `static_pad` mode with zero offsets, `/platform/state.pose`
+  and `/platform/landing_zone_state.center_pose` must coincide.
+- Scenario 2 `ground_moving_qr`
+  Canonical ROS 1 world entry is
+  `run_ros1_world.sh --scenario scenario_2_ground_moving_qr`, which resolves
+  to `XTDrone/sitl_config/launch/outdoor2_precision_landing.launch`.
+  The platform model is `ugv_0`, and the chain-validation UAV truth carrier is
+  a static `iris_0` spawned directly into Gazebo. The canonical dynamic
+  baseline is a low-speed script that publishes `geometry_msgs/Twist` to
+  `/ugv_0/cmd_vel` at `10 Hz` with `linear.x=0.3 m/s` in the UGV base frame for
+  `10 s` after a `5 s` warmup. The runtime now carries the required
+  `ros_controllers/velocity_controllers` and `effort_controllers` packages, so
+  the canonical validation path is pure `catvehicle` control; Gazebo
+  model-state fallback remains available only as a guarded backup path for
+  hosts that still lack those ROS 1 controller packages.
+- Scenario 3 `maritime_usv_qr`
+  Canonical ROS 1 world entry is
+  `run_ros1_world.sh --scenario scenario_3_maritime_usv_qr`, which resolves to
+  `PX4_Firmware/launch/sandisland.launch` with
+  `catkin_ws/build/vrx_gazebo/worlds/example_course.world`. The chain-validation
+  carrier is `wamv` in `maritime_usv` mode, with
+  `platform_offset_xyz=[0.0, 0.0, 1.25]` and
+  `landing_zone_offset_xyz=[0.5, 0.0, 1.25]`, so the expected landing-zone
+  offset in the platform frame is `[0.5, 0.0, 0.0]`.
+
+Chain-validation artifacts:
+
+- `summary.json`
+- `events.jsonl`
+- `frame_audit_report.json`
+- `geometry_consistency_report.json`
+
+`summary.json` now carries both `mission_outcome` and
+`chain_validation_passed`. For scenario 1/2/3 chain validation, the
+authoritative pass bit is `chain_validation_passed`;
+`mission_outcome=aborted_or_failed` does not invalidate a run by itself.
+This makes `run_chain_validation.sh` the formal validation entrypoint, not the
+general mission-runtime entrypoint.
+
+Latest validated chain runs:
+
+- Scenario 1: `/home/jia/uav-usv-experiment-runs/scenario_1_static_ground_qr/run_20260405_113721`
+- Scenario 2: `/home/jia/uav-usv-experiment-runs/scenario_2_ground_moving_qr/run_20260405_115811`
+- Scenario 3: `/home/jia/uav-usv-experiment-runs/scenario_3_maritime_usv_qr/scenario3_chain_pass_164525`
+
+Latest shell-exit validation runs:
+
+- Scenario 1: `/home/jia/uav-usv-experiment-runs/scenario_1_static_ground_qr/worldentry_s1_162819`
+- Scenario 2 (pure `catvehicle`, `UGV_GAZEBO_FALLBACK_MODE=never`):
+  `/home/jia/uav-usv-experiment-runs/scenario_2_ground_moving_qr/worldentry_s2_162941`
+- Scenario 3:
+  `/home/jia/uav-usv-experiment-runs/scenario_3_maritime_usv_qr/scenario3_chain_pass_164525`
 
 ## Optional custom install root
 
@@ -260,10 +351,13 @@ The runtime scripts accept an optional install root as the first argument:
 ./scripts/run_sim.sh /data/uav-usv-experiment-platform-runtime
 ./scripts/run_mission.sh /data/uav-usv-experiment-platform-runtime
 ./scripts/bootstrap_mixed_stack.sh /data/uav-usv-experiment-platform-runtime
-./scripts/run_ros1_world.sh /data/uav-usv-experiment-platform-runtime
-./scripts/run_ros1_deck_interface.sh /data/uav-usv-experiment-platform-runtime
+./scripts/run_ros1_world.sh --scenario scenario_3_maritime_usv_qr --install-root /data/uav-usv-experiment-platform-runtime
+./scripts/run_ros1_platform_interface.sh /data/uav-usv-experiment-platform-runtime
 ./scripts/run_ros1_bridge.sh /data/uav-usv-experiment-platform-runtime
 ./scripts/run_ros2_research.sh /data/uav-usv-experiment-platform-runtime
+./scripts/run_chain_validation.sh --scenario scenario_1_static_ground_qr --install-root /data/uav-usv-experiment-platform-runtime
+./scripts/run_chain_validation.sh --scenario scenario_2_ground_moving_qr --install-root /data/uav-usv-experiment-platform-runtime
+./scripts/run_chain_validation.sh --scenario scenario_3_maritime_usv_qr --install-root /data/uav-usv-experiment-platform-runtime
 ```
 
 You can also override these environment variables when needed:
@@ -296,5 +390,6 @@ You can also override these environment variables when needed:
 - The default XTDrone upstream is a Gitee URL. If your target machine cannot access Gitee, override `XTDRONE_REPO_URL` when running `scripts/bootstrap.sh`.
 - The mixed bootstrap builds `ros1_bridge` from source inside the runtime, so it does not require the binary `ros-foxy-ros1-bridge` package to be installable on the host machine.
 - The frozen coordinate rule for the mixed stack is: research nodes stay in `world` ENU, and only `controller_interface/px4_offboard_bridge` converts commands into PX4 local NED.
-- `scripts/run_ros2_research.sh` now launches `joint_bringup/baseline_minimal.launch.py` by default.
+- `scripts/run_ros2_research.sh` now launches `joint_bringup/mission_stack_minimal.launch.py` by default.
+- The interface layer is now named consistently across ROS 1 and ROS 2 as `platform_interface_ros1` / `platform_interface`, while `mission_stack_msgs` remains the ROS 2 contract package.
 - This repository is intended for `Ubuntu 20.04 + Gazebo Classic 11 + ROS 1 Noetic + ROS 2 Foxy`, with the VRX main world on ROS 1 and the research layer on ROS 2. It should not be treated as a drop-in deployment package for Ubuntu 22.04 or newer without adaptation.

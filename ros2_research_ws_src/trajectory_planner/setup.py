@@ -9,6 +9,16 @@ setup(
     data_files=[
         ("share/ament_index/resource_index/packages", ["resource/" + package_name]),
         ("share/" + package_name, ["package.xml", "README.md"]),
+        (
+            "share/" + package_name + "/config",
+            [
+                "config/planner_baseline.yaml",
+                "config/planner_moving_target.yaml",
+                "config/planner_chance_constrained.yaml",
+                "config/planner_tube_based.yaml",
+                "config/planner_learning_augmented.yaml",
+            ],
+        ),
     ],
     install_requires=["setuptools"],
     zip_safe=True,
@@ -19,6 +29,7 @@ setup(
     entry_points={
         "console_scripts": [
             "moving_deck_planner = trajectory_planner.moving_deck_planner_node:main",
+            "trajectory_planner_node = trajectory_planner.moving_deck_planner_node:main",
         ],
     },
 )

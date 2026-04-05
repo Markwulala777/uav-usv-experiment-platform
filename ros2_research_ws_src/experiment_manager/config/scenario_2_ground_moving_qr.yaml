@@ -1,0 +1,133 @@
+/**:
+  ros__parameters:
+    use_sim_time: true
+
+experiment_manager:
+  ros__parameters:
+    scenario_id: scenario_2_ground_moving_qr
+    seed: 84
+    mode: mission_stack_full
+    platform_type: ugv_marker
+    motion_profile: ground_vehicle
+    default_planner_backend: moving_target
+    default_reference_source: planner
+    planner_required: true
+    allow_planner_active_path: true
+    planner_shadow_mode: false
+    window_logic_enabled: false
+    decision_logic_enabled: true
+    enable_decision: true
+    enable_planner: true
+    enable_safety: true
+    enable_touchdown: true
+    relative_state_source: truth
+    platform_state_source: bridge
+    landing_zone_state_source: bridge
+    uav_state_source: truth
+    phase_profile: ground_moving_qr
+    metrics_profile: scenario_2
+    enabled_modules:
+      - platform_interface
+      - relative_estimation
+      - mission_manager
+      - landing_decision
+      - landing_guidance
+      - trajectory_planner
+      - controller_interface
+      - safety_manager
+      - touchdown_manager
+      - experiment_manager
+      - metrics_evaluator
+
+platform_truth_ingest:
+  ros__parameters:
+    deck_source: bridge
+    platform_type: ugv_marker
+    motion_mode: ground_vehicle
+
+platform_landing_zone_state:
+  ros__parameters:
+    deck_length: 2.0
+    deck_width: 1.2
+    zone_source: bridge
+
+platform_uav_truth_provider:
+  ros__parameters:
+    uav_source: truth
+
+relative_state_active_mux:
+  ros__parameters:
+    source_mode: truth
+
+mission_manager:
+  ros__parameters:
+    approach_xy_gate: 3.5
+    align_xy_gate: 1.8
+    synchronize_lateral_speed_gate: 1.0
+    require_decision_continue: true
+
+decision_advisory:
+  ros__parameters:
+    window_logic_enabled: false
+
+window_status:
+  ros__parameters:
+    window_xy_gate: 0.9
+    window_lateral_speed_gate: 1.0
+    window_vertical_speed_gate: 0.9
+
+landing_guidance:
+  ros__parameters:
+    approach_height: 5.0
+    align_height: 3.5
+    synchronize_height: 2.5
+    terminal_height: 0.4
+    descent_rate: 0.3
+
+safety_manager:
+  ros__parameters:
+    abort_xy_error: 4.5
+    abort_abs_z: 8.0
+    abort_lateral_speed: 3.5
+    safe_xy_gate: 0.9
+    safe_lateral_speed_gate: 1.0
+
+touchdown_manager:
+  ros__parameters:
+    contact_height_threshold: 0.18
+    stable_contact_duration: 0.6
+    success_xy_threshold: 0.6
+    success_vertical_speed: 0.9
+    success_lateral_speed: 0.9
+
+frame_audit:
+  ros__parameters:
+    expected_target_offset_xyz: [0.0, 0.0, 1.25]
+    target_offset_tolerance: 0.10
+    relative_position_tolerance: 0.2
+    relative_velocity_tolerance: 0.2
+
+geometry_consistency:
+  ros__parameters:
+    stable_topic_window_sec: 2.0
+    sample_window_sec: 10.0
+    reference_frame: world
+    expected_landing_zone_offset_xyz: [0.0, 0.0, 1.25]
+    platform_offset_tolerance: 0.10
+    relative_position_tolerance: 0.20
+    relative_velocity_tolerance: 0.20
+    zero_offset_position_tolerance: 0.01
+    zero_offset_yaw_tolerance: 0.01
+    required_zero_offset_alignment: false
+
+metrics_evaluator:
+  ros__parameters:
+    chain_validation_mode: true
+    minimum_observation_sec: 35.0
+    required_topic_runtime_sec: 30.0
+    minimum_phase_dwell_sec: 1.0
+    topic_dropout_tolerance_sec: 2.5
+    require_platform_motion: true
+    minimum_platform_displacement_m: 1.0
+    motion_warmup_sec: 5.0
+    motion_eval_duration_sec: 10.0

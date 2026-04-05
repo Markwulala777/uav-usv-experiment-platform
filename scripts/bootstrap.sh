@@ -17,6 +17,18 @@ PX4_BUILD_TARGET="${PX4_BUILD_TARGET:-px4_sitl_default}"
 PX4_SIM_TARGET="${PX4_SIM_TARGET:-sitl_gazebo-classic}"
 SKIP_ROSDEP="${SKIP_ROSDEP:-0}"
 SKIP_PX4_PIP="${SKIP_PX4_PIP:-0}"
+CMAKE_MODULES_REPO_URL="${CMAKE_MODULES_REPO_URL:-https://github.com/ros/cmake_modules.git}"
+CMAKE_MODULES_REF="${CMAKE_MODULES_REF:-0.5-devel}"
+TELEOP_TOOLS_REPO_URL="${TELEOP_TOOLS_REPO_URL:-https://github.com/ros-teleop/teleop_tools.git}"
+TELEOP_TOOLS_REF="${TELEOP_TOOLS_REF:-noetic-devel}"
+VELODYNE_SIMULATOR_REPO_URL="${VELODYNE_SIMULATOR_REPO_URL:-https://github.com/lmark1/velodyne_simulator.git}"
+VELODYNE_SIMULATOR_REF="${VELODYNE_SIMULATOR_REF:-master}"
+ROS_CONTROLLERS_REPO_URL="${ROS_CONTROLLERS_REPO_URL:-https://github.com/ros-controls/ros_controllers.git}"
+ROS_CONTROLLERS_REF="${ROS_CONTROLLERS_REF:-noetic-devel}"
+FOUR_WHEEL_STEERING_MSGS_REPO_URL="${FOUR_WHEEL_STEERING_MSGS_REPO_URL:-https://github.com/ros-drivers/four_wheel_steering_msgs.git}"
+FOUR_WHEEL_STEERING_MSGS_REF="${FOUR_WHEEL_STEERING_MSGS_REF:-master}"
+URDF_GEOMETRY_PARSER_REPO_URL="${URDF_GEOMETRY_PARSER_REPO_URL:-https://github.com/ros-controls/urdf_geometry_parser.git}"
+URDF_GEOMETRY_PARSER_REF="${URDF_GEOMETRY_PARSER_REF:-kinetic-devel}"
 
 need_cmd() {
   if ! command -v "$1" >/dev/null 2>&1; then
@@ -40,14 +52,19 @@ reset_ros_env() {
 
 install_runtime_scripts() {
   mkdir -p "$INSTALL_ROOT/scripts"
+  rm -f "$INSTALL_ROOT/scripts/run_ros1_deck_interface.sh"
   rsync -a \
+    "$REPO_ROOT/scripts/run_chain_validation.sh" \
+    "$REPO_ROOT/scripts/scenario_world_profiles.sh" \
     "$REPO_ROOT/scripts/run_sim.sh" \
     "$REPO_ROOT/scripts/run_mission.sh" \
     "$REPO_ROOT/scripts/run_ros1_world.sh" \
-    "$REPO_ROOT/scripts/run_ros1_deck_interface.sh" \
+    "$REPO_ROOT/scripts/run_ros1_platform_interface.sh" \
     "$REPO_ROOT/scripts/run_microxrce_agent.sh" \
     "$REPO_ROOT/scripts/run_ros1_bridge.sh" \
     "$REPO_ROOT/scripts/run_ros2_research.sh" \
+    "$REPO_ROOT/scripts/ensure_ros1_controller_deps.sh" \
+    "$REPO_ROOT/scripts/run_ugv_motion_baseline.sh" \
     "$REPO_ROOT/scripts/stop_platform.sh" \
     "$INSTALL_ROOT/scripts/"
   chmod +x "$INSTALL_ROOT/scripts/"*.sh
@@ -84,6 +101,15 @@ clone_or_checkout() {
   git -C "$target_dir" submodule update --init --recursive --force
 }
 
+ensure_catkin_support_sources() {
+  clone_or_checkout "$CMAKE_MODULES_REPO_URL" "$CATKIN_WS/src/cmake_modules" "$CMAKE_MODULES_REF" "cmake_modules"
+  clone_or_checkout "$TELEOP_TOOLS_REPO_URL" "$CATKIN_WS/src/teleop_tools" "$TELEOP_TOOLS_REF" "teleop_tools"
+  clone_or_checkout "$VELODYNE_SIMULATOR_REPO_URL" "$CATKIN_WS/src/velodyne_simulator" "$VELODYNE_SIMULATOR_REF" "velodyne_simulator"
+  clone_or_checkout "$ROS_CONTROLLERS_REPO_URL" "$CATKIN_WS/src/ros_controllers" "$ROS_CONTROLLERS_REF" "ros_controllers"
+  clone_or_checkout "$FOUR_WHEEL_STEERING_MSGS_REPO_URL" "$CATKIN_WS/src/four_wheel_steering_msgs" "$FOUR_WHEEL_STEERING_MSGS_REF" "four_wheel_steering_msgs"
+  clone_or_checkout "$URDF_GEOMETRY_PARSER_REPO_URL" "$CATKIN_WS/src/urdf_geometry_parser" "$URDF_GEOMETRY_PARSER_REF" "urdf_geometry_parser"
+}
+
 if [[ ! -f /opt/ros/noetic/setup.bash ]]; then
   echo "ROS Noetic was not found at /opt/ros/noetic/setup.bash" >&2
   exit 1
@@ -104,6 +130,9 @@ clone_or_checkout "$XTDRONE_REPO_URL" "$XTDRONE_DIR" "$XTDRONE_REF" "XTDrone"
 
 echo "[bootstrap] Syncing catkin workspace snapshot"
 rsync -a --delete "$REPO_ROOT/catkin_ws_src/" "$CATKIN_WS/src/"
+
+echo "[bootstrap] Ensuring supplemental ROS 1 support sources"
+ensure_catkin_support_sources
 
 echo "[bootstrap] Applying experiment overlays"
 "$SCRIPT_DIR/apply_overlay.sh" "$INSTALL_ROOT"
@@ -145,7 +174,7 @@ echo "[bootstrap] Building PX4 SITL"
 (
   reset_ros_env
   cd "$PX4_DIR"
-  DONT_RUN=1 make "$PX4_BUILD_TARGET" "$PX4_SIM_TARGET"
+  DONT_RUN=1 make "$PX4_BUILD_TARGET" px4 "$PX4_SIM_TARGET"
 )
 
 echo "[bootstrap] Building catkin workspace"

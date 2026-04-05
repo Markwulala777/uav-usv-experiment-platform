@@ -3,7 +3,7 @@ import math
 import rclpy
 from rclpy.node import Node
 from std_msgs.msg import Bool
-from uav_usv_landing_msgs.msg import RelativeState, SafetyStatus
+from mission_stack_msgs.msg import RelativeState, SafetyStatus
 
 
 class SafetyMonitorNode(Node):

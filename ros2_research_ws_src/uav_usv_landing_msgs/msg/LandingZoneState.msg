@@ -1,9 +1,0 @@
-std_msgs/Header header
-geometry_msgs/Pose zone_pose
-geometry_msgs/Pose center_pose
-geometry_msgs/Twist twist
-geometry_msgs/Polygon boundary
-float32 length
-float32 width
-float32 corridor_yaw
-string source

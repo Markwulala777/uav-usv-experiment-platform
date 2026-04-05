@@ -52,8 +52,26 @@ done
 
 echo "[apply_overlay] Syncing PX4 overlay into $PX4_DIR"
 rsync -a "$REPO_ROOT/overlays/PX4_Firmware/" "$PX4_DIR/"
+if [[ -f "$PX4_DIR/scripts/px4" ]]; then
+  chmod +x "$PX4_DIR/scripts/px4"
+fi
 
 echo "[apply_overlay] Syncing XTDrone overlay into $XTDRONE_DIR"
 rsync -a "$REPO_ROOT/overlays/XTDrone/" "$XTDRONE_DIR/"
+
+CATVEHICLE_SRC_DIR="$XTDRONE_DIR/sitl_config/ugv/catvehicle/src"
+for rel_path in cmdvel2gazebo.py odom2path.py; do
+  target="$CATVEHICLE_SRC_DIR/$rel_path"
+  if [[ -f "$target" ]]; then
+    sed -i '1s|^#!/usr/bin/env python$|#!/usr/bin/env python3|' "$target"
+  fi
+done
+
+PX4_GAZEBO_MODELS_DIR="$PX4_DIR/Tools/simulation/gazebo-classic/sitl_gazebo-classic/models"
+XTDRONE_MODELS_DIR="$XTDRONE_DIR/sitl_config/models"
+if [[ -d "$PX4_GAZEBO_MODELS_DIR" && -d "$XTDRONE_MODELS_DIR" ]]; then
+  echo "[apply_overlay] Syncing XTDrone Gazebo models into PX4 SITL Gazebo model tree"
+  rsync -a "$XTDRONE_MODELS_DIR/" "$PX4_GAZEBO_MODELS_DIR/"
+fi
 
 echo "[apply_overlay] Done."

@@ -3,7 +3,7 @@ import math
 import rclpy
 from rclpy.node import Node
 from std_msgs.msg import Bool
-from uav_usv_landing_msgs.msg import (
+from mission_stack_msgs.msg import (
     LandingDecisionStatus,
     MissionStatus,
     RelativeState,
@@ -27,6 +27,7 @@ class PhaseManagerNode(Node):
         self.declare_parameter("approach_xy_gate", 3.0)
         self.declare_parameter("align_xy_gate", 1.5)
         self.declare_parameter("synchronize_lateral_speed_gate", 0.8)
+        self.declare_parameter("require_decision_continue", False)
 
         self.phase_pub = self.create_publisher(MissionStatus, "/mission/phase", 10)
         self.landing_completed_pub = self.create_publisher(Bool, "/mission/landing_completed", 10)
@@ -84,6 +85,9 @@ class PhaseManagerNode(Node):
             approach_xy_gate = float(self.get_parameter("approach_xy_gate").value)
             align_xy_gate = float(self.get_parameter("align_xy_gate").value)
             sync_lateral_speed_gate = float(self.get_parameter("synchronize_lateral_speed_gate").value)
+            require_decision_continue = bool(
+                self.get_parameter("require_decision_continue").value
+            )
             xy_error = math.hypot(self.relative_state.position.x, self.relative_state.position.y)
             lateral_speed = math.hypot(
                 self.relative_state.linear_velocity.x, self.relative_state.linear_velocity.y
@@ -95,13 +99,16 @@ class PhaseManagerNode(Node):
                 self.set_phase(MissionStatus.ALIGN, "inside_approach_gate")
             elif lateral_speed > sync_lateral_speed_gate:
                 self.set_phase(MissionStatus.SYNCHRONIZE, "align_complete_sync_pending")
-            elif (
-                self.decision_status is not None
-                and self.decision_status.advisory == LandingDecisionStatus.CONTINUE
-            ):
-                self.set_phase(MissionStatus.TERMINAL_DESCENT, "decision_continue")
+            elif require_decision_continue:
+                if (
+                    self.decision_status is not None
+                    and self.decision_status.advisory == LandingDecisionStatus.CONTINUE
+                ):
+                    self.set_phase(MissionStatus.TERMINAL_DESCENT, "decision_continue")
+                else:
+                    self.set_phase(MissionStatus.WINDOW_WAIT, "waiting_for_window")
             else:
-                self.set_phase(MissionStatus.WINDOW_WAIT, "waiting_for_window")
+                self.set_phase(MissionStatus.TERMINAL_DESCENT, "decision_bypass_enabled")
 
         msg = MissionStatus()
         msg.header.stamp = self.get_clock().now().to_msg()

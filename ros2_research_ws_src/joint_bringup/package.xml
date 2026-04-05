@@ -12,7 +12,7 @@
   <exec_depend>launch</exec_depend>
   <exec_depend>launch_ros</exec_depend>
   <exec_depend>controller_interface</exec_depend>
-  <exec_depend>deck_interface</exec_depend>
+  <exec_depend>platform_interface</exec_depend>
   <exec_depend>experiment_manager</exec_depend>
   <exec_depend>landing_decision</exec_depend>
   <exec_depend>landing_guidance</exec_depend>
@@ -22,7 +22,7 @@
   <exec_depend>safety_manager</exec_depend>
   <exec_depend>touchdown_manager</exec_depend>
   <exec_depend>trajectory_planner</exec_depend>
-  <exec_depend>uav_usv_landing_msgs</exec_depend>
+  <exec_depend>mission_stack_msgs</exec_depend>
 
   <export>
     <build_type>ament_python</build_type>

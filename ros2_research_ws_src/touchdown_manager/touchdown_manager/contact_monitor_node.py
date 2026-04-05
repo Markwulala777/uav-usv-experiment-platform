@@ -2,7 +2,7 @@ import math
 
 import rclpy
 from rclpy.node import Node
-from uav_usv_landing_msgs.msg import RelativeState, TouchdownEvent, TouchdownState
+from mission_stack_msgs.msg import RelativeState, TouchdownEvent, TouchdownState
 
 
 class ContactMonitorNode(Node):

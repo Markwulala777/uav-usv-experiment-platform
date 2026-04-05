@@ -9,7 +9,7 @@ This repository now carries the current research baseline for the stricter mixed
   - truth extraction from `/gazebo/model_states`
 - ROS 2 / colcon becomes the research layer:
   - shared research-layer interface contracts
-  - deck interface normalization
+  - platform interface normalization
   - relative-state estimation
   - mission-phase ownership
   - landing-window and advisory logic
@@ -25,7 +25,7 @@ This repository now carries the current research baseline for the stricter mixed
 
 ### ROS 1 side
 
-`deck_interface_ros1` is the first strict interface node on the ROS 1 side.
+`platform_interface_ros1` is the first strict interface node on the ROS 1 side.
 It converts the broad Gazebo truth feed into a smaller contract:
 
 - `/bridge/deck/truth/pose`
@@ -43,8 +43,8 @@ These topics are intentionally standard-message-only so they can cross `ros1_bri
 
 The ROS 2 research workspace is organized under `ros2_research_ws_src/` and currently starts the first research modules:
 
-- `uav_usv_landing_msgs`
-- `deck_interface`
+- `mission_stack_msgs`
+- `platform_interface`
 - `relative_estimation`
 - `mission_manager`
 - `landing_decision`
@@ -73,7 +73,7 @@ This keeps the research-layer API independent of PX4 coordinate conventions and 
 
 The current baseline now includes:
 
-- truth-level landing-zone publication inside `deck_interface`
+- truth-level landing-zone publication inside `platform_interface`
 - ROS2-to-PX4 offboard bridge output
 - frame-audit reporting via `metrics_evaluator`
 - per-run metadata generation
@@ -90,15 +90,21 @@ The major remaining gap before thesis-grade comparative studies is not package p
 
 1. Build the ROS 1 runtime and shared world:
    - `./scripts/bootstrap_mixed_stack.sh`
-   - `./scripts/run_ros1_world.sh`
+   - `./scripts/run_ros1_world.sh --scenario scenario_3_maritime_usv_qr`
 2. Export truth-level deck/UAV/relative states on ROS 1:
-   - `./scripts/run_ros1_deck_interface.sh`
+   - `./scripts/run_ros1_platform_interface.sh`
 3. Start PX4 ROS 2 transport:
    - `./scripts/run_microxrce_agent.sh`
 4. Start `ros1_bridge`:
    - `./scripts/run_ros1_bridge.sh`
 5. Start ROS 2 research nodes:
    - `./scripts/run_ros2_research.sh`
+
+For repeatable scenario-level chain validation, prefer the formal validation entrypoint:
+
+- `./scripts/run_chain_validation.sh --scenario scenario_1_static_ground_qr`
+- `./scripts/run_chain_validation.sh --scenario scenario_2_ground_moving_qr`
+- `./scripts/run_chain_validation.sh --scenario scenario_3_maritime_usv_qr`
 
 The default ROS 2 baseline launch now:
 

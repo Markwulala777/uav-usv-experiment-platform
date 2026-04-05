@@ -1,6 +1,6 @@
 import rclpy
 from rclpy.node import Node
-from uav_usv_landing_msgs.msg import (
+from mission_stack_msgs.msg import (
     LandingDecisionStatus,
     LandingWindowStatus,
     MissionStatus,
@@ -15,6 +15,7 @@ class DecisionAdvisoryNode(Node):
         self.window_status = None
         self.mission_status = None
         self.safety_status = None
+        self.declare_parameter("window_logic_enabled", True)
 
         self.decision_pub = self.create_publisher(LandingDecisionStatus, "/landing_decision/status", 10)
 
@@ -38,6 +39,7 @@ class DecisionAdvisoryNode(Node):
         if self.mission_status is None:
             return
 
+        window_logic_enabled = bool(self.get_parameter("window_logic_enabled").value)
         msg = LandingDecisionStatus()
         msg.header.stamp = self.get_clock().now().to_msg()
 
@@ -47,6 +49,17 @@ class DecisionAdvisoryNode(Node):
         elif self.mission_status.phase == MissionStatus.ABORT_GO_AROUND:
             msg.advisory = LandingDecisionStatus.GO_AROUND
             msg.reason_codes = ["mission_abort_go_around"]
+        elif not window_logic_enabled:
+            if self.mission_status.phase in (
+                MissionStatus.SEARCH,
+                MissionStatus.APPROACH,
+                MissionStatus.ALIGN,
+            ):
+                msg.advisory = LandingDecisionStatus.HOLD
+                msg.reason_codes = ["window_logic_disabled_phase_hold"]
+            else:
+                msg.advisory = LandingDecisionStatus.CONTINUE
+                msg.reason_codes = ["window_logic_disabled"]
         elif self.window_status is None:
             msg.advisory = LandingDecisionStatus.HOLD
             msg.reason_codes = ["window_status_unavailable"]

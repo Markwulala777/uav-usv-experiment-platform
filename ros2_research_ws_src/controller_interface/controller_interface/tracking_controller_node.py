@@ -2,7 +2,7 @@ import copy
 
 import rclpy
 from rclpy.node import Node
-from uav_usv_landing_msgs.msg import ControllerCommand, ControllerReference
+from mission_stack_msgs.msg import ControllerCommand, ControllerReference
 
 
 class TrackingControllerNode(Node):

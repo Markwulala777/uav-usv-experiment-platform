@@ -1,0 +1,52 @@
+<launch>
+
+    <!-- MAVROS posix SITL environment launch script -->
+    <!-- launches Gazebo environment and 2x: MAVROS, PX4 SITL, and spawns vehicle -->
+    <!-- vehicle model and world -->
+    <arg name="est" default="ekf2"/>
+    <arg name="world" default="$(find mavlink_sitl_gazebo)/worlds/outdoor2.world"/>
+    <!-- gazebo configs -->
+    <arg name="gui" default="true"/>
+    <arg name="debug" default="false"/>
+    <arg name="verbose" default="false"/>
+    <arg name="paused" default="false"/>
+    <!-- Gazebo sim -->
+    <include file="$(find gazebo_ros)/launch/empty_world.launch">
+        <arg name="gui" value="$(arg gui)"/>
+        <arg name="world_name" value="$(arg world)"/>
+        <arg name="debug" value="$(arg debug)"/>
+        <arg name="verbose" value="$(arg verbose)"/>
+        <arg name="paused" value="$(arg paused)"/>
+    </include>
+
+    <arg name="obstaclestopper" default="false"/>
+    <group ns="ugv_0">
+        <param name="robot_description"
+                command="$(find xacro)/xacro '$(find catvehicle)/urdf/catvehicle1-3.xacro' roboname:='ugv_0'" />
+        <include file="$(find catvehicle)/launch/catvehicle.launch">
+            <arg name="robot_name" value="ugv_0"/>
+            <arg name="init_pose" value="-x 0 -y 0 -z 0 -R 0 -P 0 -Y 0"/>
+            <arg name="config_file" value="catvehicle_control.yaml"/>
+            <arg name="obstaclestopper" value="$(arg obstaclestopper)"/>
+        </include>
+
+        <!-- Uncomment this to get immediate motion from the car
+        <node name="openLoopCircle" pkg="safeopenloopcircle" type="safeopenloopcircle_node"/>
+        -->
+    </group>
+
+    <!-- iris_0: static chain-validation UAV truth carrier -->
+    <arg name="iris_0_cmd" default="xmlstarlet ed -u '//static' -v 1 $(find px4)/Tools/simulation/gazebo-classic/sitl_gazebo-classic/models/iris_downward_camera/iris_downward_camera.sdf"/>
+    <param command="$(arg iris_0_cmd)" name="iris_0_description"/>
+    <node name="iris_0_spawn" pkg="gazebo_ros" type="spawn_model" output="screen"
+          args="-sdf -param iris_0_description -model iris_0 -x -3 -y 0 -z 3.0 -R 0 -P 0 -Y 0"/>
+
+    <!-- <node pkg="tf" type="static_transform_publisher" name="0_base_link_to_base_link_frd"
+    args="0 0 -0.05 3.1415927 0 0 /base_link_0 /base_link_frd_0 100" />
+    <node pkg="tf" type="static_transform_publisher" name="1_base_link_to_base_link_frd"
+    args="0 0 -0.05 3.1415927 0 0 /base_link_1 /base_link_frd_1 100" />
+    <node pkg="tf" type="static_transform_publisher" name="2_base_link_to_base_link_frd"
+    args="0 0 -0.05 3.1415927 0 0 /base_link_2 /base_link_frd_2 100" /> -->
+
+
+</launch>

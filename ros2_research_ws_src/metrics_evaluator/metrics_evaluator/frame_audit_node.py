@@ -5,7 +5,13 @@ import os
 from rclpy.node import Node
 import rclpy
 from std_msgs.msg import Bool, String
-from uav_usv_landing_msgs.msg import DeckState, ExperimentRunStatus, LandingZoneState, RelativeState, UavState
+from mission_stack_msgs.msg import (
+    ExperimentRunStatus,
+    LandingZoneState,
+    PlatformState,
+    RelativeState,
+    UavState,
+)
 
 
 def quat_conjugate(q):
@@ -29,7 +35,7 @@ class FrameAuditNode(Node):
     def __init__(self):
         super().__init__("frame_audit")
 
-        self.deck_state = None
+        self.platform_state = None
         self.zone_state = None
         self.uav_state = None
         self.relative_state = None
@@ -44,8 +50,10 @@ class FrameAuditNode(Node):
         self.status_pub = self.create_publisher(Bool, "/metrics/frame_audit/passed", 10)
         self.report_pub = self.create_publisher(String, "/metrics/frame_audit/report", 10)
 
-        self.create_subscription(DeckState, "/deck/state_truth", self.deck_state_cb, 10)
-        self.create_subscription(LandingZoneState, "/deck/landing_zone_state", self.zone_state_cb, 10)
+        self.create_subscription(PlatformState, "/platform/state", self.platform_state_cb, 10)
+        self.create_subscription(
+            LandingZoneState, "/platform/landing_zone_state", self.zone_state_cb, 10
+        )
         self.create_subscription(UavState, "/uav/state_truth", self.uav_state_cb, 10)
         self.create_subscription(RelativeState, "/relative_state/truth", self.relative_state_cb, 10)
         self.create_subscription(ExperimentRunStatus, "/experiment/run_status", self.run_status_cb, 10)
@@ -53,8 +61,8 @@ class FrameAuditNode(Node):
         self.timer = self.create_timer(1.0, self.evaluate)
         self.get_logger().info("metrics_evaluator frame audit helper is running.")
 
-    def deck_state_cb(self, msg):
-        self.deck_state = msg
+    def platform_state_cb(self, msg):
+        self.platform_state = msg
 
     def zone_state_cb(self, msg):
         self.zone_state = msg
@@ -69,7 +77,7 @@ class FrameAuditNode(Node):
         self.output_dir = msg.output_dir
 
     def evaluate(self):
-        if not all([self.deck_state, self.zone_state, self.uav_state, self.relative_state]):
+        if not all([self.platform_state, self.zone_state, self.uav_state, self.relative_state]):
             return
 
         expected_offset = list(self.get_parameter("expected_target_offset_xyz").value)
@@ -78,10 +86,10 @@ class FrameAuditNode(Node):
         relative_velocity_tolerance = float(self.get_parameter("relative_velocity_tolerance").value)
 
         deck_q = [
-            self.deck_state.pose.orientation.x,
-            self.deck_state.pose.orientation.y,
-            self.deck_state.pose.orientation.z,
-            self.deck_state.pose.orientation.w,
+            self.platform_state.pose.orientation.x,
+            self.platform_state.pose.orientation.y,
+            self.platform_state.pose.orientation.z,
+            self.platform_state.pose.orientation.w,
         ]
         target_q = [
             self.zone_state.center_pose.orientation.x,
@@ -92,9 +100,9 @@ class FrameAuditNode(Node):
         target_q_inv = quat_conjugate(target_q)
 
         target_delta_world = [
-            self.zone_state.center_pose.position.x - self.deck_state.pose.position.x,
-            self.zone_state.center_pose.position.y - self.deck_state.pose.position.y,
-            self.zone_state.center_pose.position.z - self.deck_state.pose.position.z,
+            self.zone_state.center_pose.position.x - self.platform_state.pose.position.x,
+            self.zone_state.center_pose.position.y - self.platform_state.pose.position.y,
+            self.zone_state.center_pose.position.z - self.platform_state.pose.position.z,
         ]
         target_delta_deck = rotate_vector(quat_conjugate(deck_q), target_delta_world)
 

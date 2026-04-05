@@ -8,17 +8,17 @@ experiment_manager:
     seed: 84
     mode: full_landing_mission
 
-deck_interface:
+platform_truth_ingest:
   ros__parameters:
     deck_source: ros1_bridge_truth
 
-landing_zone_state:
+platform_landing_zone_state:
   ros__parameters:
     deck_length: 2.0
     deck_width: 1.2
     zone_source: ros1_bridge_truth
 
-uav_truth_provider:
+platform_uav_truth_provider:
   ros__parameters:
     uav_source: ros1_bridge_truth
 

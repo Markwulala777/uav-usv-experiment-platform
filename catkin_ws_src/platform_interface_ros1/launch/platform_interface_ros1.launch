@@ -1,0 +1,21 @@
+<launch>
+  <arg name="platform_mode" default="maritime_usv"/>
+  <arg name="platform_model" default="wamv"/>
+  <arg name="uav_model" default="iris_0"/>
+  <arg name="platform_offset_xyz" default="[0.0, 0.0, 1.25]"/>
+  <arg name="landing_zone_offset_xyz" default="[0.5, 0.0, 1.25]"/>
+  <node pkg="platform_interface_ros1" type="platform_truth_bridge.py" name="platform_truth_bridge" output="screen">
+    <param name="world_frame" value="world"/>
+    <param name="deck_frame" value="deck_frame"/>
+    <param name="landing_target_frame" value="landing_target_frame"/>
+    <param name="uav_frame" value="uav_base_link"/>
+    <param name="platform_mode" value="$(arg platform_mode)"/>
+    <param name="platform_model" value="$(arg platform_model)"/>
+    <param name="uav_model" value="$(arg uav_model)"/>
+    <rosparam subst_value="true" param="platform_offset_xyz">$(arg platform_offset_xyz)</rosparam>
+    <rosparam subst_value="true" param="landing_zone_offset_xyz">$(arg landing_zone_offset_xyz)</rosparam>
+    <param name="wamv_model" value="$(arg platform_model)"/>
+    <rosparam subst_value="true" param="deck_offset_xyz">$(arg platform_offset_xyz)</rosparam>
+    <rosparam subst_value="true" param="landing_target_offset_xyz">$(arg landing_zone_offset_xyz)</rosparam>
+  </node>
+</launch>

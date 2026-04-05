@@ -12,6 +12,13 @@ fi
 INSTALL_ROOT="${1:-${INSTALL_ROOT:-$DEFAULT_INSTALL_ROOT}}"
 ROS2_PX4_WS="${ROS2_PX4_WS:-$INSTALL_ROOT/ros2_px4_ws}"
 ROS2_RESEARCH_WS="${ROS2_RESEARCH_WS:-$INSTALL_ROOT/ros2_research_ws}"
+if [[ $# -ge 1 ]]; then
+  shift
+fi
+ROS2_LAUNCH_FILE="${1:-${ROS2_LAUNCH_FILE:-mission_stack_minimal.launch.py}}"
+if [[ $# -ge 1 ]]; then
+  shift
+fi
 
 source_setup() {
   local setup_file="$1"
@@ -52,4 +59,4 @@ source_setup /opt/ros/foxy/setup.bash
 source_best_setup "$ROS2_PX4_WS/install"
 source_best_setup "$ROS2_RESEARCH_WS/install"
 
-exec ros2 launch joint_bringup baseline_minimal.launch.py
+exec ros2 launch joint_bringup "$ROS2_LAUNCH_FILE" "$@"

@@ -62,7 +62,7 @@ Default runtime and output locations:
 Preferred edit zones:
 
 - `ros2_research_ws_src/*`
-- `catkin_ws_src/deck_interface_ros1`
+- `catkin_ws_src/platform_interface_ros1`
 - `scripts/*`
 - `overlays/*`
 - `docs/*`
@@ -70,20 +70,20 @@ Preferred edit zones:
 Directory roles:
 
 - `ros2_research_ws_src/`
-  ROS 2 research layer source. Main packages include `uav_usv_landing_msgs`, `deck_interface`, `relative_estimation`, `mission_manager`, `landing_decision`, `landing_guidance`, `trajectory_planner`, `safety_manager`, `controller_interface`, `touchdown_manager`, `experiment_manager`, `metrics_evaluator`, and `joint_bringup`.
-- `catkin_ws_src/deck_interface_ros1`
+  ROS 2 research layer source. Main packages include `mission_stack_msgs`, `platform_interface`, `relative_estimation`, `mission_manager`, `landing_decision`, `landing_guidance`, `trajectory_planner`, `safety_manager`, `controller_interface`, `touchdown_manager`, `experiment_manager`, `metrics_evaluator`, and `joint_bringup`.
+- `catkin_ws_src/platform_interface_ros1`
   ROS 1 truth-export boundary. It consumes `/gazebo/model_states` and republishes a reduced, bridge-friendly truth contract.
 - `scripts/`
   Bootstrap, runtime launch, and stop entrypoints.
 - `overlays/`
   Experiment-specific overlays applied onto upstream PX4 and XTDrone runtimes.
-- `catkin_ws_src/` outside `deck_interface_ros1`
+- `catkin_ws_src/` outside `platform_interface_ros1`
   Usually treat as upstream snapshot or third-party dependency code.
 
 Default ownership rule:
 
 - Prefer experiment-layer fixes first.
-- Prefer scripts, launch, config, research nodes, or `deck_interface_ros1` before touching upstream snapshots.
+- Prefer scripts, launch, config, research nodes, or `platform_interface_ros1` before touching upstream snapshots.
 - Only edit vendored upstream snapshot code when the problem cannot reasonably be fixed in the experiment layer or overlays.
 
 Source tree vs runtime tree:
@@ -145,8 +145,8 @@ After bootstrap, prefer launching from the runtime tree, not from the source tre
 
 Standard five-terminal bring-up order:
 
-1. `~/uav-usv-experiment-platform-runtime/scripts/run_ros1_world.sh`
-2. `~/uav-usv-experiment-platform-runtime/scripts/run_ros1_deck_interface.sh`
+1. `~/uav-usv-experiment-platform-runtime/scripts/run_ros1_world.sh --scenario scenario_3_maritime_usv_qr`
+2. `~/uav-usv-experiment-platform-runtime/scripts/run_ros1_platform_interface.sh`
 3. `~/uav-usv-experiment-platform-runtime/scripts/run_microxrce_agent.sh`
 4. `~/uav-usv-experiment-platform-runtime/scripts/run_ros1_bridge.sh`
 5. `~/uav-usv-experiment-platform-runtime/scripts/run_ros2_research.sh`
@@ -154,22 +154,31 @@ Standard five-terminal bring-up order:
 Script roles:
 
 - `run_ros1_world.sh`
-  Delegates to `run_sim.sh` and starts the ROS 1 world layer plus PX4 SITL-related simulation.
-- `run_ros1_deck_interface.sh`
-  Starts `deck_interface_ros1`.
+  Canonical ROS 1 world selector. Use `--scenario` to choose between the frozen
+  scenario 1/2/3 world profiles; it then delegates to `run_sim.sh`.
+- `run_ros1_platform_interface.sh`
+  Starts `platform_interface_ros1`.
 - `run_microxrce_agent.sh`
   Starts `MicroXRCEAgent` on UDP port `8888` by default.
 - `run_ros1_bridge.sh`
   Starts `ros1_bridge` using `dynamic_bridge`.
 - `run_ros2_research.sh`
-  Launches `joint_bringup baseline_minimal.launch.py`.
+  Launches `joint_bringup mission_stack_minimal.launch.py`.
+- `run_chain_validation.sh`
+  Formal single-entry validation launcher for
+  `scenario_1_static_ground_qr`, `scenario_2_ground_moving_qr`, and
+  `scenario_3_maritime_usv_qr`. It wraps ROS 1 world startup,
+  `platform_interface_ros1`, `MicroXRCEAgent`, `ros1_bridge`, ROS 2 bringup,
+  and scenario-specific motion baselines where applicable. Treat it as the
+  formal chain-validation entrypoint, not the default day-to-day mission
+  runtime entrypoint.
 - `run_mission.sh`
   Legacy ROS 1 / XTDrone mission entrypoint. It is not the main mixed-stack research-layer entrypoint.
 
 Default ROS 2 baseline nodes:
 
 - `experiment_manager`
-- `deck_interface`
+- `platform_interface`
 - `relative_estimation`
 - `mission_manager`
 - `landing_decision`
@@ -204,6 +213,7 @@ Expected run artifacts:
 - `scenario.yaml`
 - `events.jsonl`
 - `frame_audit_report.json`
+- `geometry_consistency_report.json`
 - `summary.json`
 - `summary.csv`
 
@@ -220,6 +230,8 @@ High-value topics to inspect first:
 - `/controller/reference_active`
 - `/metrics/frame_audit/passed`
 - `/metrics/frame_audit/report`
+- `/metrics/geometry_consistency/passed`
+- `/metrics/geometry_consistency/report`
 - `/experiment/run_status`
 - `/experiment/events`
 
@@ -237,7 +249,8 @@ Recommended validation order:
 3. Confirm `use_sim_time` is still in effect where required.
 4. Confirm references are still published in research-layer `world` ENU, not prematurely converted to NED upstream.
 5. Confirm `metrics_evaluator/frame_audit` still passes and writes `frame_audit_report.json`.
-6. Confirm a full run still writes `summary.json` and `summary.csv`.
+6. Confirm `metrics_evaluator/geometry_consistency` still passes and writes `geometry_consistency_report.json`.
+7. Confirm a full run still writes `summary.json` and `summary.csv`.
 
 Minimum validation by task type:
 
@@ -245,6 +258,11 @@ Minimum validation by task type:
   Rebuild `ros2_research_ws`, restart `run_ros2_research.sh`, then inspect node logs, topics, and output files.
 - Mixed-stack startup debugging
   Verify bootstrap artifacts exist, then bring up terminals in order and isolate the first broken stage.
+- Scenario chain-validation debugging
+  Prefer `run_chain_validation.sh --scenario ...`, then inspect
+  `summary.json.chain_validation_passed`, `frame_audit_report.json`,
+  `geometry_consistency_report.json`, and the per-process logs under
+  `logs/`.
 - PX4/offboard logic change
   Always inspect `/guidance/reference`, `/controller/reference_active`, `/fmu/out/vehicle_local_position`, and `frame_audit_report.json`.
 
@@ -255,7 +273,7 @@ Favor minimal, local, reproducible changes.
 Default change order:
 
 1. Parameters, launch files, configs, scripts, or ROS 2 research nodes
-2. `deck_interface_ros1`
+2. `platform_interface_ros1`
 3. `overlays/*`
 4. Upstream snapshot code
 
@@ -270,7 +288,7 @@ Typical follow-up actions after edits:
 
 - `ros2_research_ws_src/*`
   Rebuild the runtime `ros2_research_ws` with `colcon build --symlink-install`, then restart `run_ros2_research.sh`.
-- `catkin_ws_src/deck_interface_ros1` or other catkin packages
+- `catkin_ws_src/platform_interface_ros1` or other catkin packages
   Resync into the runtime tree, rebuild the catkin workspace, then restart affected ROS 1 processes.
 - `overlays/*`
   Re-run `scripts/apply_overlay.sh` or the relevant bootstrap flow, then rebuild affected runtime components.
@@ -314,7 +332,7 @@ If full runtime validation is not feasible, at least do static consistency check
 - Symptoms
   ROS 1 truth topics exist but ROS 2 side does not receive the bridged data
 - Response
-  Confirm `run_ros1_deck_interface.sh` is running, then confirm `run_ros1_bridge.sh` is running, then confirm `ros1_bridge_ws` was successfully built or a system `ros1_bridge` is available
+  Confirm `run_ros1_platform_interface.sh` is running, then confirm `run_ros1_bridge.sh` is running, then confirm `ros1_bridge_ws` was successfully built or a system `ros1_bridge` is available
 
 5. Frame boundary violation
 
@@ -333,7 +351,7 @@ If full runtime validation is not feasible, at least do static consistency check
 7. Output files missing
 
 - Symptoms
-  No `run_metadata.json`, `events.jsonl`, `frame_audit_report.json`, `summary.json`, or `summary.csv`
+  No `run_metadata.json`, `events.jsonl`, `frame_audit_report.json`, `geometry_consistency_report.json`, `summary.json`, or `summary.csv`
 - Response
   Check `/experiment/run_status`, then check whether the run reached touchdown or abort, then check output directory permissions and node logs
 

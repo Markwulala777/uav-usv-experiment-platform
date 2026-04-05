@@ -2,7 +2,7 @@ import copy
 
 import rclpy
 from rclpy.node import Node
-from uav_usv_landing_msgs.msg import GuidanceReference, LandingZoneState, MissionStatus, RelativeState
+from mission_stack_msgs.msg import GuidanceReference, LandingZoneState, MissionStatus, RelativeState
 
 
 class StageReferenceNode(Node):
@@ -22,7 +22,9 @@ class StageReferenceNode(Node):
         self.reference_pub = self.create_publisher(GuidanceReference, "/guidance/reference", 10)
 
         self.create_subscription(MissionStatus, "/mission/phase", self.mission_status_cb, 10)
-        self.create_subscription(LandingZoneState, "/deck/landing_zone_state", self.zone_state_cb, 10)
+        self.create_subscription(
+            LandingZoneState, "/platform/landing_zone_state", self.zone_state_cb, 10
+        )
         self.create_subscription(RelativeState, "/relative_state/active", self.relative_state_cb, 10)
 
         self.timer = self.create_timer(0.05, self.publish_reference)

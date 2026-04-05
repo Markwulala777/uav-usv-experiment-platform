@@ -3,7 +3,7 @@ import math
 import rclpy
 from geometry_msgs.msg import PoseStamped, TwistStamped
 from rclpy.node import Node
-from uav_usv_landing_msgs.msg import LandingZoneState, RelativeState, UavState
+from mission_stack_msgs.msg import LandingZoneState, RelativeState, UavState
 
 
 def quat_conjugate(q):
@@ -48,7 +48,9 @@ class TruthRelativeStateNode(Node):
             TwistStamped, "/relative_estimation/debug/relative_twist", 10
         )
 
-        self.create_subscription(LandingZoneState, "/deck/landing_zone_state", self.zone_state_cb, 10)
+        self.create_subscription(
+            LandingZoneState, "/platform/landing_zone_state", self.zone_state_cb, 10
+        )
         self.create_subscription(UavState, "/uav/state_truth", self.uav_state_cb, 10)
 
         self.timer = self.create_timer(0.05, self.publish_relative_state)

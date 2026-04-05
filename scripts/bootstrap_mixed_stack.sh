@@ -25,14 +25,19 @@ need_cmd() {
 
 install_runtime_scripts() {
   mkdir -p "$INSTALL_ROOT/scripts"
+  rm -f "$INSTALL_ROOT/scripts/run_ros1_deck_interface.sh"
   rsync -a \
+    "$REPO_ROOT/scripts/run_chain_validation.sh" \
+    "$REPO_ROOT/scripts/scenario_world_profiles.sh" \
     "$REPO_ROOT/scripts/run_sim.sh" \
     "$REPO_ROOT/scripts/run_mission.sh" \
     "$REPO_ROOT/scripts/run_ros1_world.sh" \
-    "$REPO_ROOT/scripts/run_ros1_deck_interface.sh" \
+    "$REPO_ROOT/scripts/run_ros1_platform_interface.sh" \
     "$REPO_ROOT/scripts/run_microxrce_agent.sh" \
     "$REPO_ROOT/scripts/run_ros1_bridge.sh" \
     "$REPO_ROOT/scripts/run_ros2_research.sh" \
+    "$REPO_ROOT/scripts/ensure_ros1_controller_deps.sh" \
+    "$REPO_ROOT/scripts/run_ugv_motion_baseline.sh" \
     "$REPO_ROOT/scripts/stop_platform.sh" \
     "$INSTALL_ROOT/scripts/"
   chmod +x "$INSTALL_ROOT/scripts/"*.sh
@@ -80,6 +85,20 @@ clone_or_checkout_simple() {
 
   echo "[mixed-bootstrap] Checking out $label ref $repo_ref"
   git -C "$target_dir" checkout "$repo_ref"
+}
+
+clean_stale_ros2_research_artifacts() {
+  local workspace_root="$1"
+  local stale_packages=(
+    "uav_usv_landing_msgs"
+    "deck_interface"
+  )
+
+  for package_name in "${stale_packages[@]}"; do
+    rm -rf \
+      "$workspace_root/build/$package_name" \
+      "$workspace_root/install/$package_name"
+  done
 }
 
 if [[ ! -f /opt/ros/noetic/setup.bash ]]; then
@@ -131,6 +150,7 @@ fi
 
 echo "[mixed-bootstrap] Syncing ROS 2 research workspace snapshot"
 rsync -a --delete "$REPO_ROOT/ros2_research_ws_src/" "$ROS2_RESEARCH_WS/src/"
+clean_stale_ros2_research_artifacts "$ROS2_RESEARCH_WS"
 
 if [[ -d "$ROS2_PX4_WS/src/px4_msgs" && -d "$ROS2_PX4_WS/src/px4_ros_com" ]]; then
   echo "[mixed-bootstrap] Building ros2_px4_ws"
@@ -174,8 +194,9 @@ echo "[mixed-bootstrap] Building ros1_bridge_ws"
 echo
 echo "[mixed-bootstrap] Done."
 echo "[mixed-bootstrap] Next terminals:"
-echo "  1. $INSTALL_ROOT/scripts/run_ros1_world.sh"
-echo "  2. $INSTALL_ROOT/scripts/run_ros1_deck_interface.sh"
+echo "  1. $INSTALL_ROOT/scripts/run_ros1_world.sh --scenario scenario_3_maritime_usv_qr"
+echo "  2. $INSTALL_ROOT/scripts/run_ros1_platform_interface.sh"
 echo "  3. $INSTALL_ROOT/scripts/run_microxrce_agent.sh"
 echo "  4. $INSTALL_ROOT/scripts/run_ros1_bridge.sh"
 echo "  5. $INSTALL_ROOT/scripts/run_ros2_research.sh"
+echo "  Chain validation: $INSTALL_ROOT/scripts/run_chain_validation.sh --scenario scenario_1_static_ground_qr"

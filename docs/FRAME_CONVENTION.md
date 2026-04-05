@@ -33,11 +33,11 @@ This document freezes the current research-baseline frame convention for the mix
 
 ## Truth publishing responsibilities
 
-- ROS1 `deck_interface_ros1`
+- ROS1 `platform_interface_ros1`
   - Publishes deck truth, target truth, UAV truth, and truth relative states.
   - Source topics come from `/gazebo/model_states`.
-- ROS2 `deck_interface`
-  - Owns `/deck/*` public interfaces and transitional debug truth relays.
+- ROS2 `platform_interface`
+  - Owns `/platform/*` public interfaces and transitional debug truth relays.
 - ROS2 `relative_estimation`
   - Recomputes truth relative states and exposes `/relative_state/active`.
 - ROS2 `landing_guidance`

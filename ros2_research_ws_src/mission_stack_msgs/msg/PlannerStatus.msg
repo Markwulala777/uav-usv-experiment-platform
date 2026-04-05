@@ -1,0 +1,11 @@
+std_msgs/Header header
+uint8 phase
+string planner_backend
+bool feasible
+bool replan_requested
+string[] replan_reason_codes
+string diagnostic_code
+float32 solve_time_ms
+string active_terminal_mode
+string[] active_constraints
+string source

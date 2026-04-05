@@ -2,7 +2,7 @@ import math
 
 import rclpy
 from rclpy.node import Node
-from uav_usv_landing_msgs.msg import LandingWindowStatus, MissionStatus, RelativeState
+from mission_stack_msgs.msg import LandingWindowStatus, MissionStatus, RelativeState
 
 
 class WindowStatusNode(Node):

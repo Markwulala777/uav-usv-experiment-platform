@@ -20,6 +20,7 @@ setup(
         "console_scripts": [
             "summary_writer = metrics_evaluator.summary_writer:main",
             "frame_audit = metrics_evaluator.frame_audit_node:main",
+            "geometry_consistency = metrics_evaluator.geometry_consistency_node:main",
         ],
     },
 )

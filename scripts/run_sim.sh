@@ -13,6 +13,7 @@ INSTALL_ROOT="${1:-${INSTALL_ROOT:-$DEFAULT_INSTALL_ROOT}}"
 
 CATKIN_WS="${CATKIN_WS:-$INSTALL_ROOT/catkin_ws}"
 PX4_DIR="${PX4_DIR:-$INSTALL_ROOT/PX4_Firmware}"
+XTDRONE_DIR="${XTDRONE_DIR:-$INSTALL_ROOT/XTDrone}"
 WORLD_FILE="${WORLD_FILE:-$CATKIN_WS/build/vrx_gazebo/worlds/example_course.world}"
 LAUNCH_FILE="${LAUNCH_FILE:-$PX4_DIR/launch/sandisland.launch}"
 
@@ -95,9 +96,9 @@ filter_colon_var GAZEBO_MODEL_PATH
 filter_colon_var GAZEBO_RESOURCE_PATH
 
 if [[ -n "${ROS_PACKAGE_PATH:-}" ]]; then
-  export ROS_PACKAGE_PATH="$PX4_DIR:$ROS_PACKAGE_PATH"
+  export ROS_PACKAGE_PATH="$PX4_DIR:$PX4_DIR/Tools/simulation/gazebo-classic/sitl_gazebo-classic:$XTDRONE_DIR/sitl_config/ugv:$ROS_PACKAGE_PATH"
 else
-  export ROS_PACKAGE_PATH="$PX4_DIR"
+  export ROS_PACKAGE_PATH="$PX4_DIR:$PX4_DIR/Tools/simulation/gazebo-classic/sitl_gazebo-classic:$XTDRONE_DIR/sitl_config/ugv"
 fi
 
 export GAZEBO_PLUGIN_PATH=""
@@ -113,6 +114,14 @@ elif [[ -f "$PX4_DIR/Tools/setup_gazebo.bash" ]]; then
 else
   echo "Missing PX4 Gazebo setup script under $PX4_DIR/Tools" >&2
   exit 1
+fi
+
+if [[ -d "$XTDRONE_DIR/sitl_config/models" ]]; then
+  if [[ -n "${GAZEBO_MODEL_PATH:-}" ]]; then
+    export GAZEBO_MODEL_PATH="$GAZEBO_MODEL_PATH:$XTDRONE_DIR/sitl_config/models"
+  else
+    export GAZEBO_MODEL_PATH="$XTDRONE_DIR/sitl_config/models"
+  fi
 fi
 
 if ! rospack find mavros >/dev/null 2>&1; then

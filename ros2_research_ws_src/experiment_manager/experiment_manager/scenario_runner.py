@@ -4,12 +4,13 @@ import os
 
 import rclpy
 from rclpy.node import Node
-from uav_usv_landing_msgs.msg import (
+from mission_stack_msgs.msg import (
     ExperimentEvent,
     ExperimentRunStatus,
     LandingDecisionStatus,
     LandingWindowStatus,
     MissionStatus,
+    ScenarioProfile,
     SafetyStatus,
     TouchdownEvent,
 )
@@ -24,6 +25,39 @@ class ScenarioRunner(Node):
         self.declare_parameter("seed", 42)
         self.declare_parameter("mode", "baseline_minimal")
         self.declare_parameter("output_root", os.path.expanduser("~/uav-usv-experiment-runs"))
+        self.declare_parameter("platform_type", "deck")
+        self.declare_parameter("motion_profile", "truth")
+        self.declare_parameter("default_planner_backend", "baseline")
+        self.declare_parameter("default_reference_source", "guidance")
+        self.declare_parameter("planner_required", False)
+        self.declare_parameter("allow_planner_active_path", True)
+        self.declare_parameter("planner_shadow_mode", False)
+        self.declare_parameter("window_logic_enabled", False)
+        self.declare_parameter("decision_logic_enabled", False)
+        self.declare_parameter("enable_decision", False)
+        self.declare_parameter("enable_planner", True)
+        self.declare_parameter("enable_safety", True)
+        self.declare_parameter("enable_touchdown", True)
+        self.declare_parameter("relative_state_source", "truth")
+        self.declare_parameter("platform_state_source", "bridge")
+        self.declare_parameter("landing_zone_state_source", "bridge")
+        self.declare_parameter("uav_state_source", "truth")
+        self.declare_parameter("phase_profile", "baseline")
+        self.declare_parameter("metrics_profile", "baseline")
+        self.declare_parameter(
+            "enabled_modules",
+            [
+                "platform_interface",
+                "relative_estimation",
+                "mission_manager",
+                "landing_guidance",
+                "trajectory_planner",
+                "controller_interface",
+                "touchdown_manager",
+                "experiment_manager",
+                "metrics_evaluator",
+            ],
+        )
 
         self.scenario_id = str(self.get_parameter("scenario_id").value)
         self.run_id = str(self.get_parameter("run_id").value) or datetime.now().strftime("%Y%m%d_%H%M%S")
@@ -38,6 +72,9 @@ class ScenarioRunner(Node):
         self.last_safety_signature = None
 
         self.run_status_pub = self.create_publisher(ExperimentRunStatus, "/experiment/run_status", 10)
+        self.scenario_profile_pub = self.create_publisher(
+            ScenarioProfile, "/experiment/scenario_profile", 10
+        )
         self.event_pub = self.create_publisher(ExperimentEvent, "/experiment/events", 10)
 
         self.prepare_output_dir()
@@ -147,6 +184,51 @@ class ScenarioRunner(Node):
         self.emit_event("touchdown_manager", "touchdown_event", msg.event_type, msg.reason)
 
     def publish_metadata(self):
+        scenario_msg = ScenarioProfile()
+        scenario_msg.header.stamp = self.get_clock().now().to_msg()
+        scenario_msg.scenario_id = self.scenario_id
+        scenario_msg.platform_type = str(self.get_parameter("platform_type").value)
+        scenario_msg.motion_profile = str(self.get_parameter("motion_profile").value)
+        scenario_msg.default_planner_backend = str(
+            self.get_parameter("default_planner_backend").value
+        )
+        scenario_msg.default_reference_source = str(
+            self.get_parameter("default_reference_source").value
+        )
+        scenario_msg.planner_required = bool(self.get_parameter("planner_required").value)
+        scenario_msg.allow_planner_active_path = bool(
+            self.get_parameter("allow_planner_active_path").value
+        )
+        scenario_msg.planner_shadow_mode = bool(
+            self.get_parameter("planner_shadow_mode").value
+        )
+        scenario_msg.window_logic_enabled = bool(
+            self.get_parameter("window_logic_enabled").value
+        )
+        scenario_msg.decision_logic_enabled = bool(
+            self.get_parameter("decision_logic_enabled").value
+        )
+        scenario_msg.enable_decision = bool(self.get_parameter("enable_decision").value)
+        scenario_msg.enable_planner = bool(self.get_parameter("enable_planner").value)
+        scenario_msg.enable_safety = bool(self.get_parameter("enable_safety").value)
+        scenario_msg.enable_touchdown = bool(self.get_parameter("enable_touchdown").value)
+        scenario_msg.relative_state_source = str(
+            self.get_parameter("relative_state_source").value
+        )
+        scenario_msg.platform_state_source = str(
+            self.get_parameter("platform_state_source").value
+        )
+        scenario_msg.landing_zone_state_source = str(
+            self.get_parameter("landing_zone_state_source").value
+        )
+        scenario_msg.uav_state_source = str(self.get_parameter("uav_state_source").value)
+        scenario_msg.phase_profile = str(self.get_parameter("phase_profile").value)
+        scenario_msg.metrics_profile = str(self.get_parameter("metrics_profile").value)
+        scenario_msg.enabled_modules = [
+            str(item) for item in self.get_parameter("enabled_modules").value
+        ]
+        self.scenario_profile_pub.publish(scenario_msg)
+
         msg = ExperimentRunStatus()
         msg.header.stamp = self.get_clock().now().to_msg()
         msg.scenario_id = self.scenario_id

@@ -1,0 +1,9 @@
+std_msgs/Header header
+geometry_msgs/Pose pose
+geometry_msgs/Twist twist
+geometry_msgs/Vector3 angular_velocity
+string platform_type
+string motion_mode
+string source
+geometry_msgs/Vector3 linear_acceleration
+geometry_msgs/Vector3 disturbance_estimate

@@ -5,7 +5,7 @@ import rclpy
 from rclpy.node import Node
 from rclpy.qos import DurabilityPolicy, HistoryPolicy, QoSProfile, ReliabilityPolicy
 from std_msgs.msg import Bool
-from uav_usv_landing_msgs.msg import ControllerCommand, MissionStatus, UavState
+from mission_stack_msgs.msg import ControllerCommand, MissionStatus, UavState
 
 
 def yaw_from_quaternion(quaternion):

@@ -11,7 +11,7 @@
 
   <depend>rclpy</depend>
   <depend>std_msgs</depend>
-  <depend>uav_usv_landing_msgs</depend>
+  <depend>mission_stack_msgs</depend>
 
   <export>
     <build_type>ament_python</build_type>
