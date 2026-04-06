@@ -2,7 +2,7 @@
 
 本文件记录此仓库的所有重要变更。格式基于 [Keep a Changelog](https://keepachangelog.com/zh-CN/1.1.0/)，版本遵循 [Semantic Versioning](https://semver.org/lang/zh-CN/)。
 
-本日志只记录 `uav-usv-experiment-platform` 平台仓库本身的变更，不转录 vendored 第三方子项目各自独立的更新日志。
+本日志只记录 `uav-landing-experiment-platform` 平台仓库本身的变更，不转录 vendored 第三方子项目各自独立的更新日志。
 
 未发布的变更应先写入 `[Unreleased]`；发版时将其归档为 `## [0.x.y] - YYYY-MM-DD`，并同步创建对应的 Git tag `v0.x.y`。
 
@@ -10,7 +10,9 @@
 
 本节记录尚未发布的变更。
 
-- 暂无。
+### 变更
+
+- 仓库名称由 `uav-usv-experiment-platform` 调整为 `uav-landing-experiment-platform`，默认运行时目录同步调整为 `~/uav-landing-experiment-platform-runtime`，默认实验输出目录同步调整为 `~/uav-landing-experiment-runs`。
 
 ## [0.3.0] - 2026-04-05
 
@@ -79,12 +81,12 @@
 
 ### 新增
 
-- 初始化 `uav-usv-experiment-platform` 仓库，纳入 ROS catkin workspace source snapshot、PX4/XTDrone overlay、基础 bootstrap 与运行脚本。
+- 初始化 `uav-usv-experiment-platform` 仓库（现 `uav-landing-experiment-platform`），纳入 ROS catkin workspace source snapshot、PX4/XTDrone overlay、基础 bootstrap 与运行脚本。
 - 建立面向迁移部署的仓库骨架，明确通过 bootstrap 在仓库外构建运行时工作区，并从上游获取 PX4 与 XTDrone。
 - 收录平台相关基础文档与依赖说明，形成可归档、可在另一台 Ubuntu 机器上复现实验环境的最小基线。
 
-[Unreleased]: https://github.com/Markwulala777/uav-usv-experiment-platform/compare/v0.3.0...HEAD
-[0.3.0]: https://github.com/Markwulala777/uav-usv-experiment-platform/compare/v0.2.1...v0.3.0
-[0.2.1]: https://github.com/Markwulala777/uav-usv-experiment-platform/compare/v0.2.0...v0.2.1
-[0.2.0]: https://github.com/Markwulala777/uav-usv-experiment-platform/compare/v0.1.0...v0.2.0
-[0.1.0]: https://github.com/Markwulala777/uav-usv-experiment-platform/releases/tag/v0.1.0
+[Unreleased]: https://github.com/Markwulala777/uav-landing-experiment-platform/compare/v0.3.0...HEAD
+[0.3.0]: https://github.com/Markwulala777/uav-landing-experiment-platform/compare/v0.2.1...v0.3.0
+[0.2.1]: https://github.com/Markwulala777/uav-landing-experiment-platform/compare/v0.2.0...v0.2.1
+[0.2.0]: https://github.com/Markwulala777/uav-landing-experiment-platform/compare/v0.1.0...v0.2.0
+[0.1.0]: https://github.com/Markwulala777/uav-landing-experiment-platform/releases/tag/v0.1.0

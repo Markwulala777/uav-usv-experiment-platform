@@ -3,7 +3,7 @@ set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
-INSTALL_ROOT="${1:-${INSTALL_ROOT:-$HOME/uav-usv-experiment-platform-runtime}}"
+INSTALL_ROOT="${1:-${INSTALL_ROOT:-$HOME/uav-landing-experiment-platform-runtime}}"
 
 PX4_DIR="${PX4_DIR:-$INSTALL_ROOT/PX4_Firmware}"
 XTDRONE_DIR="${XTDRONE_DIR:-$INSTALL_ROOT/XTDrone}"

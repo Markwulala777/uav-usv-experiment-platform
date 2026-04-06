@@ -18,7 +18,7 @@ def generate_launch_description():
     return LaunchDescription(
         [
             DeclareLaunchArgument("scenario_config", default_value="calm_truth.yaml"),
-            DeclareLaunchArgument("output_root", default_value="~/uav-usv-experiment-runs"),
+            DeclareLaunchArgument("output_root", default_value="~/uav-landing-experiment-runs"),
             DeclareLaunchArgument("run_id", default_value=""),
             DeclareLaunchArgument("seed", default_value="42"),
             DeclareLaunchArgument("scenario_id", default_value="calm_truth"),

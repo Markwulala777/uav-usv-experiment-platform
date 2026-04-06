@@ -24,7 +24,7 @@ class ScenarioRunner(Node):
         self.declare_parameter("run_id", "")
         self.declare_parameter("seed", 42)
         self.declare_parameter("mode", "baseline_minimal")
-        self.declare_parameter("output_root", os.path.expanduser("~/uav-usv-experiment-runs"))
+        self.declare_parameter("output_root", os.path.expanduser("~/uav-landing-experiment-runs"))
         self.declare_parameter("platform_type", "deck")
         self.declare_parameter("motion_profile", "truth")
         self.declare_parameter("default_planner_backend", "baseline")

@@ -54,8 +54,8 @@ Do not treat this repository as a generic template for Ubuntu 22.04+, newer ROS 
 
 Default runtime and output locations:
 
-- Runtime root: `~/uav-usv-experiment-platform-runtime`
-- Experiment outputs: `~/uav-usv-experiment-runs`
+- Runtime root: `~/uav-landing-experiment-platform-runtime`
+- Experiment outputs: `~/uav-landing-experiment-runs`
 
 # Repository Map and Ownership
 
@@ -138,18 +138,18 @@ Acceptance boundary:
 Default mixed-stack bootstrap:
 
 ```bash
-./scripts/bootstrap_mixed_stack.sh ~/uav-usv-experiment-platform-runtime
+./scripts/bootstrap_mixed_stack.sh ~/uav-landing-experiment-platform-runtime
 ```
 
 After bootstrap, prefer launching from the runtime tree, not from the source tree.
 
 Standard five-terminal bring-up order:
 
-1. `~/uav-usv-experiment-platform-runtime/scripts/run_ros1_world.sh --scenario scenario_3_maritime_usv_qr`
-2. `~/uav-usv-experiment-platform-runtime/scripts/run_ros1_platform_interface.sh`
-3. `~/uav-usv-experiment-platform-runtime/scripts/run_microxrce_agent.sh`
-4. `~/uav-usv-experiment-platform-runtime/scripts/run_ros1_bridge.sh`
-5. `~/uav-usv-experiment-platform-runtime/scripts/run_ros2_research.sh`
+1. `~/uav-landing-experiment-platform-runtime/scripts/run_ros1_world.sh --scenario scenario_3_maritime_usv_qr`
+2. `~/uav-landing-experiment-platform-runtime/scripts/run_ros1_platform_interface.sh`
+3. `~/uav-landing-experiment-platform-runtime/scripts/run_microxrce_agent.sh`
+4. `~/uav-landing-experiment-platform-runtime/scripts/run_ros1_bridge.sh`
+5. `~/uav-landing-experiment-platform-runtime/scripts/run_ros2_research.sh`
 
 Script roles:
 
@@ -219,7 +219,7 @@ Expected run artifacts:
 
 Expected output directory shape:
 
-- `~/uav-usv-experiment-runs/<scenario_id>/<run_id>/`
+- `~/uav-landing-experiment-runs/<scenario_id>/<run_id>/`
 
 High-value topics to inspect first:
 
@@ -325,7 +325,7 @@ If full runtime validation is not feasible, at least do static consistency check
 - Symptoms
   `px4_msgs`, `px4_ros_com`, or interface generation fails unexpectedly
 - Response
-  Move the runtime and ROS 2 workspaces to an ASCII-only path such as `~/uav-usv-experiment-platform-runtime`
+  Move the runtime and ROS 2 workspaces to an ASCII-only path such as `~/uav-landing-experiment-platform-runtime`
 
 4. `ros1_bridge` missing or not bridging
 

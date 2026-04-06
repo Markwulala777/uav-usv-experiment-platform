@@ -3,7 +3,7 @@ set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 SCRIPT_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
-DEFAULT_INSTALL_ROOT="$HOME/uav-usv-experiment-platform-runtime"
+DEFAULT_INSTALL_ROOT="$HOME/uav-landing-experiment-platform-runtime"
 
 if [[ -d "$SCRIPT_ROOT/ros2_research_ws" || -d "$SCRIPT_ROOT/ros2_px4_ws" ]]; then
   DEFAULT_INSTALL_ROOT="$SCRIPT_ROOT"

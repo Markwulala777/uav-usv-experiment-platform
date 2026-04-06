@@ -3,7 +3,7 @@ set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 SCRIPT_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
-DEFAULT_INSTALL_ROOT="$HOME/uav-usv-experiment-platform-runtime"
+DEFAULT_INSTALL_ROOT="$HOME/uav-landing-experiment-platform-runtime"
 source "$SCRIPT_DIR/scenario_world_profiles.sh"
 
 if [[ -d "$SCRIPT_ROOT/catkin_ws" || -d "$SCRIPT_ROOT/PX4_Firmware" ]]; then
@@ -12,7 +12,7 @@ fi
 
 INSTALL_ROOT="${INSTALL_ROOT:-$DEFAULT_INSTALL_ROOT}"
 SCENARIO_ID=""
-OUTPUT_ROOT="${OUTPUT_ROOT:-$HOME/uav-usv-experiment-runs}"
+OUTPUT_ROOT="${OUTPUT_ROOT:-$HOME/uav-landing-experiment-runs}"
 RUN_ID="${RUN_ID:-$(date +%Y%m%d_%H%M%S)}"
 TIMEOUT_SEC="${TIMEOUT_SEC:-}"
 TIMEOUT_SPECIFIED=0

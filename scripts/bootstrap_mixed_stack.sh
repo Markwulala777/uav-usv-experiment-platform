@@ -3,7 +3,7 @@ set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
-INSTALL_ROOT="${1:-${INSTALL_ROOT:-$HOME/uav-usv-experiment-platform-runtime}}"
+INSTALL_ROOT="${1:-${INSTALL_ROOT:-$HOME/uav-landing-experiment-platform-runtime}}"
 
 CATKIN_WS="${CATKIN_WS:-$INSTALL_ROOT/catkin_ws}"
 PX4_DIR="${PX4_DIR:-$INSTALL_ROOT/PX4_Firmware}"
@@ -61,7 +61,7 @@ ensure_ascii_path() {
 
   if printf '%s' "$path_value" | LC_ALL=C grep -q '[^ -~]'; then
     echo "The mixed-stack runtime path must be ASCII-only: $path_value" >&2
-    echo "Use a path such as ~/uav-usv-experiment-platform-runtime." >&2
+    echo "Use a path such as ~/uav-landing-experiment-platform-runtime." >&2
     exit 1
   fi
 }

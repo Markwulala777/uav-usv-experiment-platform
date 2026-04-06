@@ -24,7 +24,7 @@ runtime/
 workspace/
 
 # Experiment outputs
-uav-usv-experiment-runs/
+uav-landing-experiment-runs/
 runs/
 
 # Patch / merge leftovers

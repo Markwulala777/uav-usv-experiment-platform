@@ -10,7 +10,7 @@ def generate_launch_description():
     run_id = LaunchConfiguration("run_id")
     return LaunchDescription(
         [
-            DeclareLaunchArgument("output_root", default_value="~/uav-usv-experiment-runs"),
+            DeclareLaunchArgument("output_root", default_value="~/uav-landing-experiment-runs"),
             DeclareLaunchArgument("run_id", default_value=""),
             IncludeLaunchDescription(
                 PythonLaunchDescriptionSource(

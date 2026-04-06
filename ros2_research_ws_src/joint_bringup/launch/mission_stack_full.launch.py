@@ -33,7 +33,7 @@ def generate_launch_description():
                 "scenario_config", default_value="scenario_1_static_ground_qr.yaml"
             ),
             DeclareLaunchArgument("planner_config", default_value="planner_baseline.yaml"),
-            DeclareLaunchArgument("output_root", default_value="~/uav-usv-experiment-runs"),
+            DeclareLaunchArgument("output_root", default_value="~/uav-landing-experiment-runs"),
             DeclareLaunchArgument("run_id", default_value=""),
             DeclareLaunchArgument("seed", default_value="42"),
             DeclareLaunchArgument("planner_backend", default_value="scenario_default"),

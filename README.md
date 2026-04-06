@@ -1,4 +1,4 @@
-# uav-usv-experiment-platform
+# uav-landing-experiment-platform
 
 This repository packages the current UAV-USV cooperative landing experiment into a form that is easier to archive on GitHub and deploy on another Ubuntu machine.
 
@@ -27,7 +27,7 @@ The runtime PX4 worktree becomes `v1.14.0-dirty` after this repository's overlay
 ## Repository layout
 
 ```text
-uav-usv-experiment-platform/
+uav-landing-experiment-platform/
 ├── catkin_ws_src/
 ├── ros2_research_ws_src/
 ├── overlays/
@@ -57,9 +57,9 @@ For Codex and similar coding agents, see [AGENT.md](AGENT.md).
 
 `scripts/bootstrap.sh` creates a runtime workspace outside this repository by default:
 
-- `~/uav-usv-experiment-platform-runtime/catkin_ws`
-- `~/uav-usv-experiment-platform-runtime/PX4_Firmware`
-- `~/uav-usv-experiment-platform-runtime/XTDrone`
+- `~/uav-landing-experiment-platform-runtime/catkin_ws`
+- `~/uav-landing-experiment-platform-runtime/PX4_Firmware`
+- `~/uav-landing-experiment-platform-runtime/XTDrone`
 
 The script then:
 
@@ -160,7 +160,7 @@ The main pipeline is:
 -> /controller/command -> controller_interface/px4_offboard_bridge
 ```
 
-For ROS 2 workspaces, prefer an ASCII-only path such as `~/uav-usv-experiment-platform-runtime` and avoid non-ASCII paths like `~/下载/...`, because `px4_msgs` interface generation was observed to fail under a non-ASCII workspace path on this machine.
+For ROS 2 workspaces, prefer an ASCII-only path such as `~/uav-landing-experiment-platform-runtime` and avoid non-ASCII paths like `~/下载/...`, because `px4_msgs` interface generation was observed to fail under a non-ASCII workspace path on this machine.
 
 The mixed bootstrap defaults to the local source combination that was validated on this machine:
 
@@ -197,8 +197,8 @@ rosdep update
 Clone this repository:
 
 ```bash
-git clone <your-github-url> uav-usv-experiment-platform
-cd uav-usv-experiment-platform
+git clone https://github.com/Markwulala777/uav-landing-experiment-platform.git uav-landing-experiment-platform
+cd uav-landing-experiment-platform
 ```
 
 Bootstrap the runtime workspace:
@@ -236,17 +236,17 @@ After Gazebo is stable, start the mission controller in terminal 2:
 Bootstrap the mixed runtime on an ASCII-only path:
 
 ```bash
-./scripts/bootstrap_mixed_stack.sh ~/uav-usv-experiment-platform-runtime
+./scripts/bootstrap_mixed_stack.sh ~/uav-landing-experiment-platform-runtime
 ```
 
 Then start the five runtime terminals in order:
 
 ```bash
-~/uav-usv-experiment-platform-runtime/scripts/run_ros1_world.sh --scenario scenario_3_maritime_usv_qr
-~/uav-usv-experiment-platform-runtime/scripts/run_ros1_platform_interface.sh
-~/uav-usv-experiment-platform-runtime/scripts/run_microxrce_agent.sh
-~/uav-usv-experiment-platform-runtime/scripts/run_ros1_bridge.sh
-~/uav-usv-experiment-platform-runtime/scripts/run_ros2_research.sh
+~/uav-landing-experiment-platform-runtime/scripts/run_ros1_world.sh --scenario scenario_3_maritime_usv_qr
+~/uav-landing-experiment-platform-runtime/scripts/run_ros1_platform_interface.sh
+~/uav-landing-experiment-platform-runtime/scripts/run_microxrce_agent.sh
+~/uav-landing-experiment-platform-runtime/scripts/run_ros1_bridge.sh
+~/uav-landing-experiment-platform-runtime/scripts/run_ros2_research.sh
 ```
 
 After bootstrap, the runtime directory carries its own `scripts/` folder. Day-to-day launching can stay entirely inside the runtime tree, and you no longer need to call the source-repository path just to start the platform.
@@ -256,9 +256,9 @@ bring-up flow. For scenario 1/2/3 chain validation, prefer the canonical
 single-entry validation command instead of launching each terminal by hand:
 
 ```bash
-~/uav-usv-experiment-platform-runtime/scripts/run_chain_validation.sh --scenario scenario_1_static_ground_qr
-~/uav-usv-experiment-platform-runtime/scripts/run_chain_validation.sh --scenario scenario_2_ground_moving_qr
-~/uav-usv-experiment-platform-runtime/scripts/run_chain_validation.sh --scenario scenario_3_maritime_usv_qr
+~/uav-landing-experiment-platform-runtime/scripts/run_chain_validation.sh --scenario scenario_1_static_ground_qr
+~/uav-landing-experiment-platform-runtime/scripts/run_chain_validation.sh --scenario scenario_2_ground_moving_qr
+~/uav-landing-experiment-platform-runtime/scripts/run_chain_validation.sh --scenario scenario_3_maritime_usv_qr
 ```
 
 ## Scenario launch mapping
@@ -330,34 +330,34 @@ general mission-runtime entrypoint.
 
 Latest validated chain runs:
 
-- Scenario 1: `/home/jia/uav-usv-experiment-runs/scenario_1_static_ground_qr/run_20260405_113721`
-- Scenario 2: `/home/jia/uav-usv-experiment-runs/scenario_2_ground_moving_qr/run_20260405_115811`
-- Scenario 3: `/home/jia/uav-usv-experiment-runs/scenario_3_maritime_usv_qr/scenario3_chain_pass_164525`
+- Scenario 1: `/home/jia/uav-landing-experiment-runs/scenario_1_static_ground_qr/run_20260405_113721`
+- Scenario 2: `/home/jia/uav-landing-experiment-runs/scenario_2_ground_moving_qr/run_20260405_115811`
+- Scenario 3: `/home/jia/uav-landing-experiment-runs/scenario_3_maritime_usv_qr/scenario3_chain_pass_164525`
 
 Latest shell-exit validation runs:
 
-- Scenario 1: `/home/jia/uav-usv-experiment-runs/scenario_1_static_ground_qr/worldentry_s1_162819`
+- Scenario 1: `/home/jia/uav-landing-experiment-runs/scenario_1_static_ground_qr/worldentry_s1_162819`
 - Scenario 2 (pure `catvehicle`, `UGV_GAZEBO_FALLBACK_MODE=never`):
-  `/home/jia/uav-usv-experiment-runs/scenario_2_ground_moving_qr/worldentry_s2_162941`
+  `/home/jia/uav-landing-experiment-runs/scenario_2_ground_moving_qr/worldentry_s2_162941`
 - Scenario 3:
-  `/home/jia/uav-usv-experiment-runs/scenario_3_maritime_usv_qr/scenario3_chain_pass_164525`
+  `/home/jia/uav-landing-experiment-runs/scenario_3_maritime_usv_qr/scenario3_chain_pass_164525`
 
 ## Optional custom install root
 
 The runtime scripts accept an optional install root as the first argument:
 
 ```bash
-./scripts/bootstrap.sh /data/uav-usv-experiment-platform-runtime
-./scripts/run_sim.sh /data/uav-usv-experiment-platform-runtime
-./scripts/run_mission.sh /data/uav-usv-experiment-platform-runtime
-./scripts/bootstrap_mixed_stack.sh /data/uav-usv-experiment-platform-runtime
-./scripts/run_ros1_world.sh --scenario scenario_3_maritime_usv_qr --install-root /data/uav-usv-experiment-platform-runtime
-./scripts/run_ros1_platform_interface.sh /data/uav-usv-experiment-platform-runtime
-./scripts/run_ros1_bridge.sh /data/uav-usv-experiment-platform-runtime
-./scripts/run_ros2_research.sh /data/uav-usv-experiment-platform-runtime
-./scripts/run_chain_validation.sh --scenario scenario_1_static_ground_qr --install-root /data/uav-usv-experiment-platform-runtime
-./scripts/run_chain_validation.sh --scenario scenario_2_ground_moving_qr --install-root /data/uav-usv-experiment-platform-runtime
-./scripts/run_chain_validation.sh --scenario scenario_3_maritime_usv_qr --install-root /data/uav-usv-experiment-platform-runtime
+./scripts/bootstrap.sh /data/uav-landing-experiment-platform-runtime
+./scripts/run_sim.sh /data/uav-landing-experiment-platform-runtime
+./scripts/run_mission.sh /data/uav-landing-experiment-platform-runtime
+./scripts/bootstrap_mixed_stack.sh /data/uav-landing-experiment-platform-runtime
+./scripts/run_ros1_world.sh --scenario scenario_3_maritime_usv_qr --install-root /data/uav-landing-experiment-platform-runtime
+./scripts/run_ros1_platform_interface.sh /data/uav-landing-experiment-platform-runtime
+./scripts/run_ros1_bridge.sh /data/uav-landing-experiment-platform-runtime
+./scripts/run_ros2_research.sh /data/uav-landing-experiment-platform-runtime
+./scripts/run_chain_validation.sh --scenario scenario_1_static_ground_qr --install-root /data/uav-landing-experiment-platform-runtime
+./scripts/run_chain_validation.sh --scenario scenario_2_ground_moving_qr --install-root /data/uav-landing-experiment-platform-runtime
+./scripts/run_chain_validation.sh --scenario scenario_3_maritime_usv_qr --install-root /data/uav-landing-experiment-platform-runtime
 ```
 
 You can also override these environment variables when needed:
