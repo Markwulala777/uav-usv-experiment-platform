@@ -8,20 +8,44 @@ INSTALL_ROOT="${1:-${INSTALL_ROOT:-$HOME/uav-landing-experiment-platform-runtime
 PX4_DIR="${PX4_DIR:-$INSTALL_ROOT/PX4_Firmware}"
 XTDRONE_DIR="${XTDRONE_DIR:-$INSTALL_ROOT/XTDrone}"
 
-if [[ ! -d "$PX4_DIR" ]]; then
-  echo "Missing PX4 target directory: $PX4_DIR" >&2
-  exit 1
-fi
+need_cmd() {
+  if ! command -v "$1" >/dev/null 2>&1; then
+    echo "Missing required command: $1" >&2
+    exit 1
+  fi
+}
 
-if [[ ! -d "$XTDRONE_DIR" ]]; then
-  echo "Missing XTDrone target directory: $XTDRONE_DIR" >&2
-  exit 1
-fi
+validate_runtime_tree() {
+  local tree_path="$1"
+  local label="$2"
+  local marker_path="$3"
 
-if ! command -v rsync >/dev/null 2>&1; then
-  echo "Missing required command: rsync" >&2
-  exit 1
-fi
+  if [[ -z "$tree_path" || "$tree_path" == "/" ]]; then
+    echo "Refusing to use unsafe $label path: ${tree_path:-<empty>}" >&2
+    exit 1
+  fi
+
+  if [[ ! -d "$tree_path" ]]; then
+    echo "Missing $label target directory: $tree_path" >&2
+    exit 1
+  fi
+
+  if ! git -C "$tree_path" rev-parse --is-inside-work-tree >/dev/null 2>&1; then
+    echo "$label target directory is not a git worktree: $tree_path" >&2
+    exit 1
+  fi
+
+  if [[ ! -e "$tree_path/$marker_path" ]]; then
+    echo "$label target directory is missing expected marker '$marker_path': $tree_path" >&2
+    exit 1
+  fi
+}
+
+need_cmd git
+need_cmd rsync
+
+validate_runtime_tree "$PX4_DIR" "PX4" "Tools/setup/requirements.txt"
+validate_runtime_tree "$XTDRONE_DIR" "XTDrone" "sitl_config"
 
 legacy_px4_paths=(
   "Tools/flightgear_bridge"
@@ -47,7 +71,7 @@ for rel_path in "${legacy_px4_paths[@]}"; do
     continue
   fi
 
-  rm -rf "$PX4_DIR/$rel_path"
+  rm -rf "${PX4_DIR:?}/${rel_path:?}"
 done
 
 echo "[apply_overlay] Syncing PX4 overlay into $PX4_DIR"

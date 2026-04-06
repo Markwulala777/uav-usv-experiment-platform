@@ -10,8 +10,9 @@ PX4_DIR="${PX4_DIR:-$INSTALL_ROOT/PX4_Firmware}"
 ROS2_PX4_WS="${ROS2_PX4_WS:-$INSTALL_ROOT/ros2_px4_ws}"
 ROS2_RESEARCH_WS="${ROS2_RESEARCH_WS:-$INSTALL_ROOT/ros2_research_ws}"
 ROS1_BRIDGE_WS="${ROS1_BRIDGE_WS:-$INSTALL_ROOT/ros1_bridge_ws}"
-PX4_MSGS_REF="${PX4_MSGS_REF:-release/1.14}"
-PX4_ROS_COM_REF="${PX4_ROS_COM_REF:-release/v1.14}"
+# Pinned from the validated PX4 ROS 2 release branches to keep fresh-machine bootstrap reproducible.
+PX4_MSGS_REF="${PX4_MSGS_REF:-ffb6e80e1c17e5714395611a020c282a87af8fa4}"
+PX4_ROS_COM_REF="${PX4_ROS_COM_REF:-e18248db6211350e6a418cb08ae38f64c314a2f4}"
 ROS1_BRIDGE_REPO_URL="${ROS1_BRIDGE_REPO_URL:-https://github.com/ros2/ros1_bridge.git}"
 ROS1_BRIDGE_REF="${ROS1_BRIDGE_REF:-foxy}"
 USE_PX4_UPDATE_BRIDGE="${USE_PX4_UPDATE_BRIDGE:-0}"
@@ -66,6 +67,16 @@ ensure_ascii_path() {
   fi
 }
 
+ensure_microxrce_agent() {
+  if command -v MicroXRCEAgent >/dev/null 2>&1; then
+    return
+  fi
+
+  echo "MicroXRCEAgent was not found in PATH." >&2
+  echo "Install it before running the mixed bootstrap; see the fresh-Ubuntu prerequisites in README.md." >&2
+  exit 1
+}
+
 clone_or_checkout_simple() {
   local repo_url="$1"
   local target_dir="$2"
@@ -116,6 +127,7 @@ ensure_ascii_path "$INSTALL_ROOT"
 need_cmd colcon
 need_cmd git
 need_cmd rsync
+ensure_microxrce_agent
 
 echo "[mixed-bootstrap] Building ROS 1 runtime"
 "$SCRIPT_DIR/bootstrap.sh" "$INSTALL_ROOT"

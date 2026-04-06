@@ -13,6 +13,8 @@
 ### 变更
 
 - 仓库名称由 `uav-usv-experiment-platform` 调整为 `uav-landing-experiment-platform`，默认运行时目录同步调整为 `~/uav-landing-experiment-platform-runtime`，默认实验输出目录同步调整为 `~/uav-landing-experiment-runs`。
+- 加固 fresh Ubuntu 20.04 部署链路：README 补充 `python3-colcon-common-extensions` 与 `MicroXRCEAgent v2.4.3` 安装说明，`bootstrap_mixed_stack.sh` 新增 `MicroXRCEAgent` 早期预检，并将 `px4_msgs` / `px4_ros_com` 默认 ref 固定为已验证 commit SHA。
+- 强化 `scripts/apply_overlay.sh` 的安全保护：在执行 overlay 与遗留路径清理前，显式校验 PX4 与 XTDrone 目标路径不是危险路径、是 git worktree，且带有项目标记文件。
 
 ## [0.3.0] - 2026-04-05
 

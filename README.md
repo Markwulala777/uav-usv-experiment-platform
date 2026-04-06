@@ -180,7 +180,7 @@ Then install the common build tools and runtime packages:
 sudo apt update
 sudo apt install -y \
   git rsync build-essential cmake ninja-build xmlstarlet \
-  python3-catkin-tools python3-rosdep python3-vcstool \
+  python3-catkin-tools python3-colcon-common-extensions python3-rosdep python3-vcstool \
   python3-osrf-pycommon python3-rosinstall-generator python3-pip \
   ros-noetic-mavros ros-noetic-mavros-extras
 ```
@@ -190,6 +190,19 @@ If `rosdep` has not been initialized yet:
 ```bash
 sudo rosdep init
 rosdep update
+```
+
+For the mixed ROS1/ROS2 stack, install `MicroXRCEAgent` before running the mixed bootstrap. The launcher scripts expect the standalone `MicroXRCEAgent` binary to be available on `PATH`.
+
+```bash
+git clone https://github.com/eProsima/Micro-XRCE-DDS-Agent.git
+cd Micro-XRCE-DDS-Agent
+git checkout v2.4.3
+mkdir -p build && cd build
+cmake ..
+make
+sudo make install
+sudo ldconfig /usr/local/lib/
 ```
 
 ## Quick start
@@ -232,6 +245,13 @@ After Gazebo is stable, start the mission controller in terminal 2:
 ```
 
 ## Mixed ROS1/ROS2 quick start
+
+The mixed bootstrap pins the validated PX4 ROS 2 bridge sources by default:
+
+- `PX4_MSGS_REF=ffb6e80e1c17e5714395611a020c282a87af8fa4`
+- `PX4_ROS_COM_REF=e18248db6211350e6a418cb08ae38f64c314a2f4`
+
+Override those only if you are intentionally testing a different PX4 ROS 2 source combination.
 
 Bootstrap the mixed runtime on an ASCII-only path:
 
